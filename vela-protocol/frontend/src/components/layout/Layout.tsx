@@ -3,6 +3,7 @@ import { Stepper } from './Stepper';
 import { useStore } from '../../store/useStore';
 import { AnimatedBackground } from '../ui/AnimatedBackground';
 import { ProtocolCore } from '../ui/ProtocolCore';
+import { VelaGuide } from '../ui/VelaGuide';
 import { useLocation } from 'react-router-dom';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -30,10 +31,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       
       <main className="flex-1 flex flex-col px-4 py-6 md:px-8 md:py-8 max-w-5xl mx-auto w-full gap-8">
         {location.pathname !== '/evidence' && <Stepper />}
-        <div className="flex-1">
+        <div className="flex-1 route-shell">
           {children}
         </div>
       </main>
+      <VelaGuide />
     </AnimatedBackground>
   );
 };

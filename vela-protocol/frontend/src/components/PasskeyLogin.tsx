@@ -82,29 +82,32 @@ export const PasskeyLogin: React.FC = () => {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="aurora-stage flex flex-col items-center justify-center text-center max-w-3xl mx-auto py-8 md:py-14"
+      className="aurora-stage flex flex-col items-center justify-center text-center max-w-5xl mx-auto py-4 md:py-6"
     >
-      <div className="hero-mark mb-7" aria-hidden="true">
-        <div className="hero-mark__orbit" />
-        <div className="hero-mark__core">V</div>
-      </div>
-      <div className="eyebrow mb-4">
-        <span className="eyebrow__dot" /> Live on Stellar testnet
-      </div>
-      <h1 className="text-4xl md:text-6xl font-bold mb-5 tracking-[-0.04em] leading-[1.02]">
-        Credit signals with<br className="hidden sm:block" /> <span className="gradient-text">privacy built in.</span>
-      </h1>
-      <p className="text-gray-400 mb-9 text-base md:text-lg max-w-2xl leading-relaxed">
-        Turn real Stellar activity into an explainable risk signal, bind subsidies to verified identities, and route collateral through Blend v2.
-      </p>
+      <div className="hero-layout w-full">
+        <div className="hero-copy-glass">
+          <div className="hero-mark mb-6" aria-hidden="true">
+            <div className="hero-mark__orbit" />
+            <div className="hero-mark__core">V</div>
+          </div>
+          <div className="eyebrow mb-4">
+            <span className="eyebrow__dot" /> Verified on Stellar testnet
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-5 tracking-[-0.04em] leading-[1.02]">
+            Credit signals with<br className="hidden sm:block" /> <span className="gradient-text">privacy built in.</span>
+          </h1>
+          <p className="text-gray-400 mb-7 text-base md:text-lg max-w-2xl leading-relaxed">
+            Turn real Stellar activity into an explainable risk signal, bind subsidies to verified identities, and route collateral through Blend v2.
+          </p>
 
-      <div className="grid grid-cols-3 gap-2 md:gap-3 w-full max-w-xl mb-7">
-        <div className="metric-chip"><strong>AI</strong><span>Explainable score</span></div>
-        <div className="metric-chip"><strong>1:1</strong><span>Identity bound</span></div>
-        <div className="metric-chip"><strong>Live</strong><span>Testnet proof</span></div>
-      </div>
+          <div className="grid grid-cols-3 gap-2 md:gap-3 w-full">
+            <div className="metric-chip"><strong>AI</strong><span>Explainable score</span></div>
+            <div className="metric-chip"><strong>1:1</strong><span>Identity bound</span></div>
+            <div className="metric-chip"><strong>Live</strong><span>Testnet proof</span></div>
+          </div>
+        </div>
 
-      <div className="glass-panel login-panel p-5 md:p-7 w-full max-w-lg flex flex-col gap-3">
+        <div className="glass-panel login-panel p-5 md:p-7 w-full flex flex-col gap-3">
         <div className="flex items-center justify-between mb-1 px-1">
           <div className="text-left">
             <p className="font-semibold">Choose a secure entry</p>
@@ -160,6 +163,7 @@ export const PasskeyLogin: React.FC = () => {
           <ShieldCheck size={20} />
           View Live Testnet Evidence
         </button>
+        </div>
       </div>
     </motion.div>
   );
