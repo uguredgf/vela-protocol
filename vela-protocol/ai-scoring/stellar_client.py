@@ -37,7 +37,6 @@ async def fetch_transactions(account_id: str, limit: int = 200) -> list:
             records = data.get("_embedded", {}).get("records", [])
             
             for record in records:
-                # Friendbot creates an account; include this real funding event for new users.
                 if record["type"] == "payment":
                     is_received = (record["to"] == account_id)
                     direction = "received" if is_received else "sent"
@@ -52,16 +51,8 @@ async def fetch_transactions(account_id: str, limit: int = 200) -> list:
                         "type": "payment",
                         "direction": direction
                     })
-                elif record["type"] == "create_account":
-                    transactions.append({
-                        "id": record["transaction_hash"],
-                        "timestamp": record["created_at"],
-                        "amount": record["starting_balance"],
-                        "asset_code": "XLM",
-                        "counterparty": record["funder"],
-                        "type": "create_account",
-                        "direction": "received"
-                    })
+                # Account creation/Friendbot funding is infrastructure bootstrap,
+                # not behavioural payment history, so it is intentionally excluded.
         except httpx.HTTPError as e:
             print(f"Error fetching from Horizon: {e}", flush=True)
             raise

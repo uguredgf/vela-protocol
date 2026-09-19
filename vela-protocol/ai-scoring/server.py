@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import os
 import httpx
+from datetime import datetime
 
 from features import extract_features_from_txs
 from model import predict_score, get_model_info, MODEL_PATH, train_model, load_model
@@ -11,6 +12,8 @@ from stellar_client import fetch_transactions, is_classic_address
 
 app = FastAPI(title="Vela Protocol AI Scoring Service")
 MIN_SCORE_THRESHOLD = 60.0
+MIN_BEHAVIORAL_TRANSACTIONS = 5
+MIN_HISTORY_DAYS = 7
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +52,28 @@ class ScoreRequest(BaseModel):
     account_id: str
     transactions: Optional[List[TransactionItem]] = None
 
+def require_sufficient_history(transactions: list) -> None:
+    """Refuse to turn sparse activity into a deceptively precise score."""
+    if len(transactions) < MIN_BEHAVIORAL_TRANSACTIONS:
+        raise HTTPException(status_code=422, detail={
+            "code": "insufficient_history",
+            "message": f"Insufficient Stellar payment history. At least {MIN_BEHAVIORAL_TRANSACTIONS} behavioural payments are required; account creation and Friendbot funding do not count.",
+            "observed_transactions": len(transactions),
+            "minimum_transactions": MIN_BEHAVIORAL_TRANSACTIONS,
+            "minimum_history_days": MIN_HISTORY_DAYS,
+        })
+    timestamps = sorted(datetime.fromisoformat((t.timestamp if isinstance(t, TransactionItem) else t["timestamp"]).replace("Z", "+00:00")) for t in transactions)
+    history_days = (timestamps[-1] - timestamps[0]).total_seconds() / 86400
+    if history_days < MIN_HISTORY_DAYS:
+        raise HTTPException(status_code=422, detail={
+            "code": "insufficient_history",
+            "message": f"Insufficient account history. Activity must span at least {MIN_HISTORY_DAYS} days before Vela presents a signal.",
+            "observed_transactions": len(transactions),
+            "observed_history_days": round(history_days, 1),
+            "minimum_transactions": MIN_BEHAVIORAL_TRANSACTIONS,
+            "minimum_history_days": MIN_HISTORY_DAYS,
+        })
+
 @app.post("/score")
 async def score_account(req: ScoreRequest):
     if not is_classic_address(req.account_id):
@@ -63,9 +88,9 @@ async def score_account(req: ScoreRequest):
             raise HTTPException(status_code=422, detail=str(e))
         except httpx.HTTPError as e:
             raise HTTPException(status_code=502, detail=f"Horizon request failed: {e}")
-        if not txs_raw:
-            raise HTTPException(status_code=404, detail="No transactions found for account")
         txs = [TransactionItem(**t) for t in txs_raw]
+
+    require_sufficient_history(txs)
     
     # Convert to dicts for feature extraction
     tx_dicts = [t.model_dump() for t in txs]
@@ -100,8 +125,7 @@ async def get_score_for_account(account_id: str):
         raise HTTPException(status_code=422, detail=str(e))
     except httpx.HTTPError as e:
         raise HTTPException(status_code=502, detail=f"Horizon request failed: {e}")
-    if not txs_raw:
-        raise HTTPException(status_code=404, detail="No transactions found for account")
+    require_sufficient_history(txs_raw)
         
     try:
         features = extract_features_from_txs(txs_raw)
