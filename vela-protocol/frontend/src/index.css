@@ -475,6 +475,23 @@
 .animated-bg .bg-accent.text-white,
 .animated-bg button.bg-accent { color: #f9f9fc; background-color: #71313c; }
 .animated-bg .text-accent { color: #71313c; }
+
+.receipt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  flex-shrink: 0;
+  border: 1px solid rgba(78, 86, 99, .16);
+  border-radius: 999px;
+  padding: .3rem .55rem;
+  font-size: .62rem;
+  font-weight: 750;
+  letter-spacing: .08em;
+  line-height: 1;
+}
+.receipt-badge--success { color: #17735d; background: rgba(42, 157, 126, .1); border-color: rgba(42, 157, 126, .24); }
+.receipt-badge--warning { color: #8a5b18; background: rgba(193, 137, 56, .1); border-color: rgba(193, 137, 56, .24); }
+.receipt-badge--muted { color: #657083; background: rgba(101, 112, 131, .08); }
 .animated-bg .border-accent\/40 { border-color: rgba(113,49,60,.4); }
 .animated-bg .bg-accent\/10 { background-color: rgba(113,49,60,.08); }
 .animated-bg .bg-success.text-white { color: #f7fbfa; }

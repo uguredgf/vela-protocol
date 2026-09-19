@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCcw, ArrowRight, Building, Wallet, Key, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
+import { RefreshCcw, ArrowRight, Building, Wallet, Key, CheckCircle, AlertTriangle, ExternalLink, Info } from 'lucide-react';
 import { sep10Auth, sep6Deposit, simulateBankTransfer, getTransactionStatus } from '../services/anchor';
 import { getUsdcBalance, withdrawToAnchor } from '../services/anchorPayment';
 import { Keypair, Transaction, Networks } from '@stellar/stellar-sdk';
@@ -15,18 +15,19 @@ type TransferMode = 'deposit' | 'withdraw';
 
 export const AnchorTransfer: React.FC = () => {
   const navigate = useNavigate();
-  const { walletAddress, classicAccount, identityVerified, recordAnchorTransaction } = useStore();
-  const [mode, setMode] = useState<TransferMode>('deposit');
-  const [amount, setAmount] = useState('');
+  const { walletAddress, classicAccount, identityVerified, anchorTransactions, recordAnchorTransaction } = useStore();
+  const resumableWithdrawal = [...anchorTransactions].reverse().find(tx => tx.type === 'withdraw' && !!tx.txHash && !['completed', 'error', 'expired'].includes(tx.status));
+  const [mode, setMode] = useState<TransferMode>(resumableWithdrawal ? 'withdraw' : 'deposit');
+  const [amount, setAmount] = useState(resumableWithdrawal?.amount ?? '');
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<DepositStep>('idle');
+  const [step, setStep] = useState<DepositStep>(resumableWithdrawal ? 'polling' : 'idle');
   const [error, setError] = useState<string | null>(null);
   const [depositId, setDepositId] = useState<string | null>(null);
   const [depositInstructions, setDepositInstructions] = useState<string | null>(null);
   const [sandboxUrl, setSandboxUrl] = useState<string | null>(null);
   const [anchorJwt, setAnchorJwt] = useState<string | null>(null);
-  const [finalStatus, setFinalStatus] = useState<string | null>(null);
-  const [withdrawHash, setWithdrawHash] = useState<string | null>(null);
+  const [finalStatus, setFinalStatus] = useState<string | null>(resumableWithdrawal?.status ?? null);
+  const [withdrawHash, setWithdrawHash] = useState<string | null>(resumableWithdrawal?.txHash ?? null);
   const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [balanceError, setBalanceError] = useState<string | null>(null);
@@ -104,6 +105,7 @@ export const AnchorTransfer: React.FC = () => {
   };
 
   const handleWithdraw = async () => {
+    let paymentSubmitted = false;
     setLoading(true);
     setError(null);
     setWithdrawHash(null);
@@ -122,10 +124,27 @@ export const AnchorTransfer: React.FC = () => {
       const jwt = await authenticateAnchor();
       setAnchorJwt(jwt);
       setStep('requesting');
-      const result = await withdrawToAnchor(classicAccount, jwt, amount);
+      const result = await withdrawToAnchor(classicAccount, jwt, amount, submission => {
+        paymentSubmitted = true;
+        setWithdrawHash(submission.hash);
+        setFinalStatus('pending_user_transfer_complete');
+        setStep('polling');
+        recordAnchorTransaction({
+          id: submission.id,
+          type: 'withdraw',
+          status: 'pending_user_transfer_complete',
+          amount,
+          asset: 'USDC',
+          startedAt: new Date().toISOString(),
+          txHash: submission.hash,
+          anchorAccount: submission.anchorAccount,
+          memo: submission.memo,
+          memoType: submission.memoType,
+        });
+      });
       setWithdrawHash(result.hash);
       setFinalStatus(result.status.status);
-      setStep(result.status.status === 'error' ? 'error' : 'completed');
+      setStep(result.status.status === 'error' ? 'error' : result.status.status === 'completed' ? 'completed' : 'polling');
       recordAnchorTransaction({
         id: result.status.id,
         type: 'withdraw',
@@ -135,23 +154,65 @@ export const AnchorTransfer: React.FC = () => {
         startedAt: result.status.started_at || new Date().toISOString(),
         completedAt: result.status.completed_at,
         txHash: result.hash,
+        anchorAccount: result.anchorAccount,
+        memo: result.memo,
+        memoType: result.memoType,
       });
       await refreshUsdcBalance();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Withdrawal failed');
-      setStep('error');
+      if (paymentSubmitted) {
+        setError('The Stellar payment was submitted and saved, but Anchor status is temporarily unavailable. Resume confirmation below; do not send again.');
+        setStep('polling');
+      } else {
+        setError(e instanceof Error ? e.message : 'Withdrawal failed');
+        setStep('error');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const changeMode = (nextMode: TransferMode) => {
+    if (resumableWithdrawal && step === 'polling') return;
     setMode(nextMode);
     setAmount('');
     setStep('idle');
     setError(null);
     setFinalStatus(null);
     setWithdrawHash(null);
+  };
+
+  const resumeWithdrawalStatus = async () => {
+    if (!resumableWithdrawal) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const jwt = await authenticateAnchor();
+      setAnchorJwt(jwt);
+      for (let i = 0; i < 20; i++) {
+        const status = await getTransactionStatus(jwt, resumableWithdrawal.id);
+        setFinalStatus(status.status);
+        recordAnchorTransaction({
+          ...resumableWithdrawal,
+          status: status.status,
+          completedAt: status.completed_at,
+        });
+        if (status.status === 'completed') {
+          setStep('completed');
+          return;
+        }
+        if (status.status === 'error' || status.status === 'expired') {
+          throw new Error(`Anchor status: ${formatAnchorStatus(status.status)}`);
+        }
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+      setStep('polling');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not refresh Anchor status');
+      setStep('polling');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSimulateBank = async () => {
@@ -203,6 +264,11 @@ export const AnchorTransfer: React.FC = () => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto space-y-6">
 
+      <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm text-amber-800">
+        <Info size={19} className="mt-0.5 shrink-0" />
+        <div><strong>Standalone Anchor interoperability demo</strong><p className="mt-1 text-xs text-gray-600">This rail uses the Stellar account’s existing USDC or a sandbox TRY deposit. It is separate from Blend and does not represent loan proceeds.</p></div>
+      </div>
+
       {/* Identity Separation Panel */}
       <div className="glass-panel p-6">
         <h3 className="text-lg font-semibold mb-4 text-white">Identity Separation</h3>
@@ -230,7 +296,7 @@ export const AnchorTransfer: React.FC = () => {
       {identityVerified && (
         <div className="flex items-start gap-3 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-200">
           <CheckCircle size={18} className="mt-0.5 flex-shrink-0" />
-          <span>Identity verified through Anchor SEP-12. This verified identity can open only one subsidized position, regardless of which wallet is used.</span>
+          <span>Anchor SEP-12 returned a sandbox customer ID, which was hashed locally. The MVP contract blocks a repeated submitted hash, but does not yet verify an Anchor signature.</span>
         </div>
       )}
 
@@ -238,10 +304,12 @@ export const AnchorTransfer: React.FC = () => {
       <div className="glass-panel overflow-hidden">
         <div className="grid grid-cols-2 border-b border-white/10">
           <button type="button" onClick={() => changeMode('deposit')}
+            disabled={!!resumableWithdrawal && step === 'polling'}
             className={`py-3 text-sm font-semibold ${mode === 'deposit' ? 'bg-accent/15 text-accent' : 'text-gray-400 hover:text-white'}`}>
             Deposit TRY to USDC
           </button>
           <button type="button" onClick={() => changeMode('withdraw')}
+            disabled={!!resumableWithdrawal && step === 'polling'}
             className={`py-3 text-sm font-semibold ${mode === 'withdraw' ? 'bg-accent/15 text-accent' : 'text-gray-400 hover:text-white'}`}>
             Withdraw USDC to TRY
           </button>
@@ -322,7 +390,7 @@ export const AnchorTransfer: React.FC = () => {
             </button>
           )}
 
-          {mode === 'withdraw' && (step === 'idle' || step === 'error') && (
+          {mode === 'withdraw' && !resumableWithdrawal && (step === 'idle' || step === 'error') && (
             <button onClick={handleWithdraw}
               disabled={!amount || loading || !classicAccount || Number(amount) <= 0 || (!!usdcBalance && Number(amount) > Number(usdcBalance))}
               className="w-full bg-accent hover:bg-accent/80 py-4 rounded-xl font-semibold transition-colors disabled:opacity-50 flex justify-center items-center gap-2">
@@ -345,7 +413,7 @@ export const AnchorTransfer: React.FC = () => {
             <div className="space-y-3">
               <StepIndicator label="SEP-10 Authentication" done={step !== 'authenticating'} active={step === 'authenticating'} />
               <StepIndicator label="SEP-6 Withdrawal Instructions" done={!['authenticating', 'requesting'].includes(step)} active={step === 'requesting'} />
-              <StepIndicator label="Stellar USDC Payment" done={step === 'completed'} active={step === 'polling'} />
+              <StepIndicator label="Stellar USDC Payment" done={!!withdrawHash} active={!withdrawHash && step === 'polling'} />
               <StepIndicator label="Anchor Status" done={step === 'completed'} active={step === 'polling'} />
             </div>
           )}
@@ -379,6 +447,12 @@ export const AnchorTransfer: React.FC = () => {
               <div>
                 <p className="text-sm text-blue-300 font-semibold">Waiting for Anchor confirmation...</p>
                 <p className="text-xs text-gray-400">{formatAnchorStatus(finalStatus)}</p>
+                {withdrawHash && <a href={getExplorerUrl(withdrawHash)} target="_blank" rel="noreferrer" className="mt-1 block text-xs text-accent underline break-all">Stellar payment confirmed: {withdrawHash}</a>}
+                {mode === 'withdraw' && withdrawHash && resumableWithdrawal && (
+                  <button type="button" onClick={() => void resumeWithdrawalStatus()} disabled={loading} className="mt-3 rounded-lg border border-blue-400/30 px-3 py-2 text-xs font-semibold text-blue-700 disabled:opacity-50">
+                    {loading ? 'Checking Anchor…' : 'Resume Anchor confirmation'}
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -426,7 +500,7 @@ export const AnchorTransfer: React.FC = () => {
           )}
 
           <button type="button" onClick={() => navigate('/transparency')} className="text-accent underline text-sm">
-            View transparency panel →
+            Review session receipt →
           </button>
         </div>
       </div>

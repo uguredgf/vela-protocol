@@ -14,7 +14,7 @@ export async function submitOpenPosition(
   if (publicInputs.length !== 36) {
     throw new Error('A qualifying 36-byte threshold claim is required');
   }
-  if (identityHash.length !== 32) throw new Error('A 32-byte verified identity hash is required');
+  if (identityHash.length !== 32) throw new Error('A 32-byte identity hash is required');
   const thresholdFlag = (publicInputs[32] << 24) | (publicInputs[33] << 16) | (publicInputs[34] << 8) | publicInputs[35];
   if (thresholdFlag !== 1) {
     throw new Error('The threshold claim does not qualify for a position');

@@ -8,6 +8,15 @@ const DEFAULT_API_BASE = import.meta.env.PROD
 
 export const SCORING_API_URL = (import.meta.env.VITE_SCORING_API_URL || DEFAULT_API_BASE).replace(/\/$/, '');
 
+function scoringError(error: unknown): Error {
+  if (axios.isAxiosError(error)) {
+    const detail = error.response?.data?.detail;
+    if (typeof detail === 'string') return new Error(detail);
+    if (detail?.message) return new Error(detail.message);
+  }
+  return error instanceof Error ? error : new Error('Scoring service is unavailable');
+}
+
 /**
  * Get creditworthiness score for an account.
  * Sends transaction history to the AI scoring service.
@@ -30,7 +39,7 @@ export async function getScore(
 
     return res.data as ScoreResult;
   } catch (error) {
-    throw error;
+    throw scoringError(error);
   }
 }
 
@@ -45,7 +54,7 @@ export async function getScoreByAccountId(accountId: string): Promise<ScoreResul
     });
     return res.data as ScoreResult;
   } catch (error) {
-    throw error;
+    throw scoringError(error);
   }
 }
 

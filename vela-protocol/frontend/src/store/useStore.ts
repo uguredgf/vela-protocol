@@ -4,7 +4,7 @@ import { ClassicAccount } from '../services/classicAccount';
 import { Keypair, StrKey } from '@stellar/stellar-sdk';
 
 const SESSION_KEY = 'vela:testnet:session:v2';
-const ANCHOR_TRANSACTIONS_KEY = 'vela:testnet:anchor-transactions:v1';
+const anchorTransactionsKey = (address: string) => `vela:testnet:anchor-transactions:v2:${address}`;
 const positionKey = (address: string) => `vela:testnet:demo-position:${address}`;
 type AuthMethod = 'passkey' | 'freighter';
 
@@ -42,9 +42,10 @@ function restoreSession(): { walletAddress: string | null; classicAccount: Class
 
 const restored = restoreSession();
 
-function restoreAnchorTransactions(): AnchorTransaction[] {
+function restoreAnchorTransactions(address?: string | null): AnchorTransaction[] {
+  if (!address) return [];
   try {
-    const saved = JSON.parse(sessionStorage.getItem(ANCHOR_TRANSACTIONS_KEY) || '[]');
+    const saved = JSON.parse(sessionStorage.getItem(anchorTransactionsKey(address)) || '[]');
     return Array.isArray(saved) ? saved : [];
   } catch {
     return [];
@@ -58,6 +59,7 @@ interface VelaStore {
   authMethod: AuthMethod | null;
   passkeyConnected: boolean;
   score: number | null;
+  guidedDemo: boolean;
   scoreExplanation: Record<string, any> | null;
   features: Record<string, number> | null;
   identityHash: Uint8Array | null;
@@ -79,6 +81,7 @@ interface VelaStore {
   setAuth: (address: string, classicAccount: ClassicAccount) => void;
   setFreighterAuth: (publicKey: string) => void;
   setScore: (score: number, explanation: any, features: any) => void;
+  startGuidedDemo: () => void;
   setIdentity: (identityHash: Uint8Array) => void;
   setProof: (proof: Uint8Array, commitment: string, publicInputs: Uint8Array) => void;
   setPosition: (position: Position) => void;
@@ -93,6 +96,7 @@ export const useStore = create<VelaStore>((set) => ({
   authMethod: restored?.authMethod ?? null,
   passkeyConnected: restored?.authMethod === 'passkey',
   score: null,
+  guidedDemo: false,
   scoreExplanation: null,
   features: null,
   identityHash: null,
@@ -105,10 +109,10 @@ export const useStore = create<VelaStore>((set) => ({
   collateralAmount: 0,
   subsidyAmount: 0,
   anchorJwt: null,
-  anchorTransactions: restoreAnchorTransactions(),
+  anchorTransactions: restoreAnchorTransactions(restored?.classicAccount.publicKey),
   recordAnchorTransaction: (transaction) => set(state => {
     const transactions = [...state.anchorTransactions.filter(item => item.id !== transaction.id), transaction];
-    sessionStorage.setItem(ANCHOR_TRANSACTIONS_KEY, JSON.stringify(transactions));
+    if (state.classicAccount) sessionStorage.setItem(anchorTransactionsKey(state.classicAccount.publicKey), JSON.stringify(transactions));
     return { anchorTransactions: transactions };
   }),
   currentStep: 0,
@@ -118,15 +122,42 @@ export const useStore = create<VelaStore>((set) => ({
   setAuth: (address, classicAccount) => {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify({ method: 'passkey-kit', walletAddress: address, publicKey: classicAccount.publicKey }));
     set({ isAuthenticated: true, walletAddress: address, classicAccount, authMethod: 'passkey', passkeyConnected: true,
-      score: null, scoreExplanation: null, features: null, proofData: null, publicInputs: null, proofGenerated: false,
-      position: restorePosition(classicAccount.publicKey), anchorTransactions: restoreAnchorTransactions(), identityHash: null, identityVerified: false });
+      score: null, guidedDemo: false, scoreExplanation: null, features: null, proofData: null, publicInputs: null, proofGenerated: false,
+      position: restorePosition(classicAccount.publicKey), anchorTransactions: restoreAnchorTransactions(classicAccount.publicKey), identityHash: null, identityVerified: false });
   },
   setFreighterAuth: (publicKey) => {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify({ method: 'freighter', publicKey }));
     set({ isAuthenticated: true, walletAddress: null, classicAccount: { publicKey }, authMethod: 'freighter', passkeyConnected: false,
-    score: null, scoreExplanation: null, features: null, proofData: null, publicInputs: null, proofGenerated: false, position: null, anchorTransactions: restoreAnchorTransactions(), identityHash: null, identityVerified: false });
+    score: null, guidedDemo: false, scoreExplanation: null, features: null, proofData: null, publicInputs: null, proofGenerated: false, position: null, anchorTransactions: restoreAnchorTransactions(publicKey), identityHash: null, identityVerified: false });
   },
-  setScore: (score, explanation, features) => set({ score, scoreExplanation: explanation, features }),
+  setScore: (score, explanation, features) => set({ score, guidedDemo: false, scoreExplanation: explanation, features }),
+  startGuidedDemo: () => set({
+    score: 72,
+    guidedDemo: true,
+    scoreExplanation: {
+      base_value: 55,
+      feature_contributions: {
+        tx_regularity: 7.2,
+        history_length_days: 5.8,
+        unique_counterparties: 3.1,
+        counterparty_concentration: -1.4,
+      },
+    },
+    features: {
+      tx_count: 24,
+      tx_frequency: 3.1,
+      tx_regularity: 4.2,
+      avg_amount: 128,
+      amount_variance: 0.31,
+      unique_counterparties: 8,
+      counterparty_concentration: 0.2,
+      income_regularity: 5.4,
+      history_length_days: 54,
+      max_gap_days: 9,
+      net_flow: 420,
+      consistency_score: 0.76,
+    },
+  }),
   setIdentity: (identityHash) => set({ identityHash, identityVerified: true }),
   setProof: (proof, commitment, publicInputs) => set({ proofData: proof, commitment, publicInputs, proofGenerated: true }),
   setPosition: (position) => {
@@ -140,10 +171,10 @@ export const useStore = create<VelaStore>((set) => ({
       sessionStorage.removeItem(`vela:testnet:classic:${state.walletAddress}`);
     }
     if (state.classicAccount) sessionStorage.removeItem(positionKey(state.classicAccount.publicKey));
-    sessionStorage.removeItem(ANCHOR_TRANSACTIONS_KEY);
+    if (state.classicAccount) sessionStorage.removeItem(anchorTransactionsKey(state.classicAccount.publicKey));
     return {
     isAuthenticated: false, walletAddress: null, classicAccount: null, authMethod: null, passkeyConnected: false,
-    score: null, scoreExplanation: null, features: null, identityHash: null, identityVerified: false,
+    score: null, guidedDemo: false, scoreExplanation: null, features: null, identityHash: null, identityVerified: false,
     proofGenerated: false, proofData: null, publicInputs: null, commitment: null,
     position: null, collateralAmount: 0, subsidyAmount: 0,
     anchorJwt: null, anchorTransactions: [], currentStep: 0, loading: false, error: null

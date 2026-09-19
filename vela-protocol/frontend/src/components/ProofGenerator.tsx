@@ -7,7 +7,7 @@ import { Lock, Cpu } from 'lucide-react';
 import { MultiStepLoader } from './ui/MultiStepLoader';
 
 export const ProofGenerator: React.FC = () => {
-  const { score, setProof } = useStore();
+  const { score, guidedDemo, setProof } = useStore();
   const navigate = useNavigate();
   const [status, setStatus] = useState<string>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -31,11 +31,12 @@ export const ProofGenerator: React.FC = () => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto space-y-6">
       <div className="glass-panel p-8 text-center space-y-6">
+        {guidedDemo && <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-sm text-amber-800">Guided sample: this local claim uses a fictional profile and will not be submitted as your position.</div>}
         <div className="w-20 h-20 bg-accent/20 rounded-full mx-auto flex items-center justify-center">
           <Lock className="text-accent" size={40} />
         </div>
         
-        <h2 className="text-2xl font-bold">Score Commitment</h2>
+        <h2 className="text-2xl font-bold">Private Threshold Claim</h2>
         <p className="text-gray-400">
           A 32-byte SHA-256 commitment and a 4-byte threshold result are prepared locally. The contract checks the payload format; this MVP does not yet cryptographically prove that the committed score meets the threshold.
         </p>
@@ -70,7 +71,7 @@ export const ProofGenerator: React.FC = () => {
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6 py-4">
             <div className="flex items-center justify-center gap-3 text-success">
               <svg className="verified-check" viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="23" /><path d="m16 27 7 7 15-16" /></svg>
-              <span className="text-xl font-semibold">Commitment Prepared</span>
+              <span className="text-xl font-semibold">Local Claim Prepared</span>
             </div>
             
             <div className="bg-surface p-4 rounded-lg text-left space-y-2 border border-success/30 font-mono text-sm">

@@ -6,22 +6,23 @@ import { Anchor, BarChart3, Check, CircleDollarSign, Fingerprint, LockKeyhole, S
 const steps = [
   { path: '/', label: 'Login', icon: Fingerprint },
   { path: '/score', label: 'Score', icon: BarChart3 },
-  { path: '/proof', label: 'Proof', icon: LockKeyhole },
-  { path: '/position', label: 'Position', icon: CircleDollarSign },
+  { path: '/proof', label: 'Commitment', icon: LockKeyhole },
+  { path: '/position', label: 'Supply', icon: CircleDollarSign },
   { path: '/anchor', label: 'Transfer', icon: Anchor },
-  { path: '/transparency', label: 'Audit', icon: ShieldCheck }
+  { path: '/transparency', label: 'Receipt', icon: ShieldCheck }
 ];
 
 export const Stepper: React.FC = () => {
   const navigate = useNavigate();
-  const currentStep = useStore(state => state.currentStep);
-  const transferCompleted = useStore(state => state.anchorTransactions.some(tx => tx.status === 'completed'));
+  const { currentStep, score, proofGenerated, position, anchorTransactions } = useStore();
+  const transferCompleted = anchorTransactions.some(tx => tx.status === 'completed');
+  const completedSteps = [currentStep > 0, score !== null, proofGenerated, !!position, transferCompleted, false];
 
   return (
     <div className="stepper-shell w-full mb-8 overflow-x-auto pb-4">
       <div className="stepper-track flex items-start w-full min-w-[680px] px-2">
         {steps.map((step, index) => {
-          const isCompleted = index < currentStep && (index !== 4 || transferCompleted);
+          const isCompleted = index < currentStep && completedSteps[index];
           const isCurrent = index === currentStep;
 
           return (

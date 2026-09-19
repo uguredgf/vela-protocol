@@ -92,6 +92,9 @@ export interface AnchorTransaction {
   startedAt: string;
   completedAt?: string;
   txHash?: string;
+  anchorAccount?: string;
+  memo?: string;
+  memoType?: string;
 }
 
 // ─── ZK Proof Types ─────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { getScore } from '../services/scoring';
-import { ArrowDownRight, ArrowUpRight, Info, RefreshCcw, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Info, RefreshCcw, ShieldCheck } from 'lucide-react';
 import { Card3D } from './ui/Card3D';
 import { VelaOracle } from './ui/VelaOracle';
 
@@ -22,7 +22,7 @@ function impactLabel(value: number) {
 }
 
 export const ScoreDisplay: React.FC = () => {
-  const { classicAccount, score, scoreExplanation, setScore } = useStore();
+  const { classicAccount, score, guidedDemo, scoreExplanation, setScore, startGuidedDemo } = useStore();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,10 +41,20 @@ export const ScoreDisplay: React.FC = () => {
     .map(([key, value]) => ({ key, value: Number(value) }))
     .sort((a, b) => Math.abs(b.value) - Math.abs(a.value)), [scoreExplanation]);
 
-  if (error || !classicAccount) return <div className="flex items-center gap-4">
-    <p role="alert" className="text-red-400">{error || 'Connect a wallet first.'}</p>
-    {classicAccount && <button type="button" title="Retry scoring" aria-label="Retry scoring" onClick={() => { setError(null); setRetryCount(count => count + 1); }} className="p-2 rounded border border-white/10 hover:bg-surface"><RefreshCcw size={18} /></button>}
-  </div>;
+  if (error || !classicAccount) {
+    const insufficient = !!error?.toLowerCase().includes('insufficient');
+    return <div className="max-w-2xl mx-auto glass-panel p-8 text-center space-y-4">
+      <AlertTriangle className={insufficient ? 'text-amber-600 mx-auto' : 'text-red-500 mx-auto'} size={34} />
+      <h2 className="text-2xl font-bold">{insufficient ? 'More payment history is needed' : 'Signal unavailable'}</h2>
+      <p role="alert" className="text-sm text-gray-500">{error || 'Connect a wallet first.'}</p>
+      {insufficient && <p className="text-xs text-gray-500">Vela no longer turns account creation or Friendbot funding into a high signal. This protects users from a precise-looking result based on too little evidence.</p>}
+      <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+        {classicAccount && <button type="button" onClick={() => { setError(null); setRetryCount(count => count + 1); }} className="bg-surface border border-white/10 px-5 py-3 rounded-xl font-semibold inline-flex items-center justify-center gap-2"><RefreshCcw size={16} /> Check again</button>}
+        {insufficient && <button type="button" onClick={() => { setError(null); startGuidedDemo(); }} className="bg-accent text-white px-5 py-3 rounded-xl font-semibold">Preview Guided Sample</button>}
+        <button type="button" onClick={() => navigate('/evidence')} className="bg-accent text-white px-5 py-3 rounded-xl font-semibold">Open Judge Evidence</button>
+      </div>
+    </div>;
+  }
 
   const getColor = (value: number) => value >= 80 ? 'text-green-400' : value >= 60 ? 'text-success' : value >= 40 ? 'text-yellow-400' : 'text-red-500';
   const getTier = (value: number) => value >= 80 ? 'Strong signal' : value >= 60 ? 'Developing signal' : value >= 40 ? 'Limited signal' : 'Not enough signal';
@@ -57,8 +67,8 @@ export const ScoreDisplay: React.FC = () => {
 
   return <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="score-page max-w-4xl mx-auto space-y-6 pb-12">
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 px-1">
-      <div><div className="text-[11px] uppercase tracking-[0.25em] text-accent mb-2">On-chain signal</div><h1 className="text-3xl md:text-4xl font-bold tracking-tight">Your credit signal</h1><p className="text-gray-400 mt-2 max-w-xl">A live behavioural read of the Stellar account powering this session.</p></div>
-      <div className="inline-flex items-center gap-2 text-xs text-emerald-300 bg-emerald-400/10 border border-emerald-400/20 px-3 py-2 rounded-full"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live Horizon data</div>
+      <div><div className="text-[11px] uppercase tracking-[0.25em] text-accent mb-2">{guidedDemo ? 'Guided sample' : 'On-chain signal'}</div><h1 className="text-3xl md:text-4xl font-bold tracking-tight">{guidedDemo ? 'Sample risk signal' : 'Your credit signal'}</h1><p className="text-gray-400 mt-2 max-w-xl">{guidedDemo ? 'A clearly labeled fictional profile for exploring the interface. It is not this account’s history or a lending result.' : 'A live behavioural read of the Stellar account powering this session.'}</p></div>
+      <div className={`inline-flex items-center gap-2 text-xs border px-3 py-2 rounded-full ${guidedDemo ? 'text-amber-700 bg-amber-500/10 border-amber-500/20' : 'text-emerald-700 bg-emerald-400/10 border-emerald-400/20'}`}><span className={`w-1.5 h-1.5 rounded-full ${guidedDemo ? 'bg-amber-500' : 'bg-emerald-400 animate-pulse'}`} /> {guidedDemo ? 'Fictional sample · no live claim' : 'Live Horizon data'}</div>
     </div>
     <Card3D className="glass-panel p-6 md:p-8 grid md:grid-cols-[230px_1fr] items-center gap-8">
       <div className="flex flex-col items-center">
@@ -69,7 +79,7 @@ export const ScoreDisplay: React.FC = () => {
         <div className="space-y-3">{rankedFactors.slice(0, 4).map(({ key, value }) => <div key={key} className="signal-factor"><span className={`signal-factor__icon ${value >= 0 ? 'is-positive' : 'is-negative'}`}>{value >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}</span><span className="flex-1 text-sm font-medium">{FEATURE_LABELS[key] || 'Account behaviour'}</span><span className={`text-xs font-semibold ${value >= 0 ? 'text-green-400' : 'text-red-400'}`}>{impactLabel(value)}</span></div>)}</div>
       </div>
     </Card3D>
-    <div className="model-note glass-panel p-4 flex items-start gap-3"><Info className="text-accent flex-shrink-0 mt-0.5" size={19} /><div><strong className="text-sm">MVP model disclosure</strong><p className="text-xs text-gray-500 mt-1">Your account metrics are live and come from Stellar Horizon. The scoring model was trained on synthetic behaviour profiles for this hackathon MVP, so this signal is demonstrative—not a lending decision or measured prediction accuracy.</p></div></div>
-    <div className="flex justify-end pt-2"><button onClick={() => navigate('/proof')} className="bg-accent hover:bg-accent/80 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg shadow-accent/20">Prepare private commitment</button></div>
+    <div className="model-note glass-panel p-4 flex items-start gap-3"><Info className="text-accent flex-shrink-0 mt-0.5" size={19} /><div><strong className="text-sm">{guidedDemo ? 'Guided sample boundary' : 'MVP model disclosure'}</strong><p className="text-xs text-gray-500 mt-1">{guidedDemo ? 'These values are a fictional walkthrough profile. You can prepare a local commitment and inspect the public Blend fixture, but Vela will not submit this sample as your on-chain position.' : 'Your account metrics are live and come from Stellar Horizon. The scoring model was trained on synthetic behaviour profiles for this hackathon MVP, so this signal is demonstrative—not a lending decision or measured prediction accuracy.'}</p></div></div>
+    <div className="flex justify-end pt-2"><button onClick={() => navigate('/proof')} className="bg-accent hover:bg-accent/80 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg shadow-accent/20">{guidedDemo ? 'Continue Sample Walkthrough' : 'Prepare private commitment'}</button></div>
   </motion.div>;
 };

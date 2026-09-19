@@ -8,21 +8,22 @@ const routeMessages: Record<string, { eyebrow: string; message: string }> = {
   '/': { eyebrow: 'Vela guide', message: 'Choose a secure way in' },
   '/score': { eyebrow: 'Signal scan', message: 'Reading real Stellar activity' },
   '/proof': { eyebrow: 'Privacy layer', message: 'Preparing your local commitment' },
-  '/position': { eyebrow: 'Gatekeeper', message: 'Routing qualified collateral' },
+  '/position': { eyebrow: 'Gatekeeper', message: 'Preparing a collateral-supply preview' },
   '/anchor': { eyebrow: 'Local rail', message: 'Connecting the Anchor sandbox' },
-  '/transparency': { eyebrow: 'Audit view', message: 'Every boundary stays visible' },
-  '/evidence': { eyebrow: 'Proof desk', message: 'Live links, no simulated claims' },
+  '/transparency': { eyebrow: 'Session receipt', message: 'Live, local and sandbox steps separated' },
+  '/evidence': { eyebrow: 'Evidence desk', message: 'Live links with explicit limitations' },
 };
 
 export const VelaGuide: React.FC = () => {
   const { pathname } = useLocation();
-  const { score, proofGenerated, position, anchorTransactions } = useStore();
+  const { score, guidedDemo, proofGenerated, position, anchorTransactions } = useStore();
   if (pathname === '/') return null;
   const routeCopy = routeMessages[pathname] || routeMessages['/'];
   const transferComplete = anchorTransactions.some(tx => tx.status === 'completed');
-  const completion = pathname === '/score' && score !== null ? { eyebrow: 'Signal ready', message: `${score}/100 · live account read` }
+  const completion = pathname === '/score' && score !== null ? { eyebrow: guidedDemo ? 'Sample ready' : 'Signal ready', message: guidedDemo ? `${score}/100 · fictional walkthrough` : `${score}/100 · live account read` }
     : pathname === '/proof' && proofGenerated ? { eyebrow: 'Privacy ready', message: 'Commitment prepared locally' }
-    : pathname === '/position' && position ? { eyebrow: 'On-chain success', message: 'Position confirmed on testnet' }
+    : pathname === '/position' && position ? { eyebrow: 'On-chain success', message: 'Blend collateral supply confirmed' }
+    : pathname === '/position' && guidedDemo ? { eyebrow: 'Guided sample', message: 'Preview only · no transaction submission' }
     : pathname === '/anchor' && transferComplete ? { eyebrow: 'Rail complete', message: 'Transfer confirmed by Anchor' }
     : null;
   const copy = completion || routeCopy;

@@ -6,6 +6,14 @@ import { TransactionStatus } from '../types';
 
 const horizon = new Horizon.Server('https://horizon-testnet.stellar.org');
 
+export interface WithdrawSubmission {
+  id: string;
+  hash: string;
+  anchorAccount: string;
+  memo: string;
+  memoType: string;
+}
+
 export async function getUsdcBalance(publicKey: string): Promise<string> {
   if (!StrKey.isValidEd25519PublicKey(publicKey)) throw new Error('A valid Stellar account is required');
   const source = await horizon.loadAccount(publicKey);
@@ -17,7 +25,18 @@ export async function getUsdcBalance(publicKey: string): Promise<string> {
   return balance?.balance ?? '0.0000000';
 }
 
-export async function withdrawToAnchor(account: ClassicAccount, jwt: string, amount: string): Promise<{ hash: string; status: TransactionStatus }> {
+export async function withdrawToAnchor(
+  account: ClassicAccount,
+  jwt: string,
+  amount: string,
+  onSubmitted?: (submission: WithdrawSubmission) => void,
+): Promise<{
+  hash: string;
+  status: TransactionStatus;
+  anchorAccount: string;
+  memo: string;
+  memoType: string;
+}> {
   if (!StrKey.isValidEd25519PublicKey(account.publicKey) || !/^(?:0|[1-9]\d*)(?:\.\d{1,7})?$/.test(amount) || Number(amount) <= 0) {
     throw new Error('A classic account and positive USDC amount (up to 7 decimals) are required');
   }
@@ -47,12 +66,32 @@ export async function withdrawToAnchor(account: ClassicAccount, jwt: string, amo
     ? (tx.sign(Keypair.fromSecret(account.secret)), tx)
     : new Transaction(await signWithFreighter(tx.toEnvelope().toXDR('base64'), account.publicKey), Networks.TESTNET);
   const submitted = await horizon.submitTransaction(signed);
+  const submission = {
+    id: instructions.id,
+    hash: submitted.hash,
+    anchorAccount: instructions.account_id,
+    memo: instructions.memo,
+    memoType: instructions.memo_type,
+  };
+  onSubmitted?.(submission);
   for (let i = 0; i < 15; i++) {
     const status = await getTransactionStatus(jwt, instructions.id);
     if (status.status !== 'pending_user_transfer_start' && status.status !== 'pending_user_transfer_complete') {
-      return { hash: submitted.hash, status };
+      return {
+        hash: submission.hash,
+        status,
+        anchorAccount: instructions.account_id,
+        memo: instructions.memo,
+        memoType: instructions.memo_type,
+      };
     }
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
-  return { hash: submitted.hash, status: await getTransactionStatus(jwt, instructions.id) };
+  return {
+    hash: submission.hash,
+    status: await getTransactionStatus(jwt, instructions.id),
+    anchorAccount: instructions.account_id,
+    memo: instructions.memo,
+    memoType: instructions.memo_type,
+  };
 }

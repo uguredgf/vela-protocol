@@ -1,6 +1,6 @@
 # 🌟 Vela Protocol
 
-> Privacy-preserving, AI-powered credit access on Stellar
+> Privacy-aware risk signals and a Blend collateral-supply prototype on Stellar
 
 [![Stellar](https://img.shields.io/badge/Stellar-Soroban-blue)](https://stellar.org)
 [![Blend v2](https://img.shields.io/badge/Blend-v2-green)](https://blend.capital)
@@ -16,14 +16,14 @@ Many Turkish small businesses and gig workers have real cash flow that is not re
 
 ## 💡 Solution
 
-Vela Protocol is an MVP that derives an explainable credit signal from Stellar activity, keeps the raw score off-chain, and submits qualified collateral to a deployed Soroban gatekeeper connected to Blend v2. The anchor leg runs against a testnet sandbox.
+Vela Protocol is a hackathon integration prototype that derives a demonstrative risk signal from sufficient Stellar payment history, keeps the raw score off-chain, and submits collateral plus a subsidy to Blend v2 through a deployed Soroban gatekeeper. It does not issue a loan. The anchor leg is a separate interoperability demo whose TRY side runs in a testnet sandbox.
 
 ### Key Differentiators
 1. **Privacy by construction**: Raw transaction history and the score stay off-chain; the current contract receives only a commitment and threshold claim
-2. **AI-Enriched Signals**: Creditworthiness derived from on-chain behavioral patterns via explainable ML
-3. **Real DeFi Integration**: Load-bearing Blend v2 integration (not a wrapper — credit mechanism runs through Blend)
+2. **AI-Enriched Signal Demo**: Explainable ML trained on synthetic behavior profiles, with a minimum-history gate
+3. **Real DeFi Integration**: A real Soroban-to-Blend collateral-supply transaction on testnet; borrow/repay/withdraw are roadmap work
 4. **Anchor integration**: SEP-10/SEP-6 flows are exercised against the TR Mock Anchor testnet sandbox; Stellar USDC payment settlement is real testnet activity
-5. **Sybil resistance**: An Anchor SEP-12 `customer_id` is hashed locally and the gatekeeper permits one subsidized position per verified identity, even when different wallets are used
+5. **Identity replay prototype**: An Anchor SEP-12 sandbox `customer_id` is hashed locally and duplicate submitted hashes are rejected; on-chain Anchor attestation is not yet implemented
 
 ---
 
@@ -56,10 +56,10 @@ Vela Protocol is an MVP that derives an explainable credit signal from Stellar a
 ### End-to-End Flow
 1. **Passkey Login** — Passkey-Kit deploys/connects a real Soroban smart-wallet C-address; a separate Friendbot-funded classic G-address is provisioned for Horizon, gatekeeper authorization, and SEP-10
 2. **Data Collection** — Transaction history fetched from Stellar Horizon API
-3. **AI Scoring** — Explainable ML model produces a 0-100 creditworthiness score
+3. **AI Scoring** — After a minimum evidence gate, an explainable synthetic-data ML model produces a demonstrative 0-100 signal
 4. **Score commitment** — Client-side SHA-256 commitment plus a 0/1 threshold claim; this MVP does not implement a Groth16 verifier
 5. **Identity binding** — SEP-10 authenticates the classic G-address; SEP-12 returns a `customer_id` that is SHA-256 hashed in the browser
-6. **On-Chain Gatekeeper** — Soroban enforces one subsidized position per identity hash and executes the configured Blend supply path
+6. **On-Chain Gatekeeper** — Soroban rejects a repeated submitted identity hash and executes the configured Blend supply path; it does not verify the hash's Anchor origin
 7. **Blend Position** — The deployed contract supplies user collateral plus subsidy to Blend; the displayed borrow figure is an estimate, not a completed borrow call
 8. **Anchor Transfer** — SEP-6 withdraw returns an anchor address/memo; the classic G-address sends real testnet USDC and the UI polls the returned anchor transaction
 
@@ -150,7 +150,7 @@ VITE_DEMO_MODE=false
 
 The FastAPI scoring service is deployed separately at `https://vela-ai-scoring.vercel.app`. Its Vercel entrypoint lives under `ai-scoring/api/`; it can also be run locally with Uvicorn.
 
-The public `/evidence` route checks the deployed model and a real Horizon-backed test account at runtime, and links directly to the verified Stellar Expert transactions. It is an evidence surface, not a mocked replacement for the interactive flow.
+The public `/evidence` route checks the deployed model service and demonstrates that sparse accounts are rejected, then links directly to verified Stellar Expert transactions. The published position fixture proves the collateral-supply integration only; it uses an empty proof and zero identity hash and is labeled accordingly.
 
 ---
 
@@ -174,8 +174,8 @@ The public `/evidence` route checks the deployed model and a real Horizon-backed
 - **No raw data on-chain**: Only a commitment/threshold payload and position state are submitted
 - **User transparency**: Users see exactly which data influenced their score
 - **No proxy discrimination**: Model explicitly excludes demographic, location, and identity features
-- **Anti-replay**: Proof commitments include nonces to prevent reuse
-- **Sybil resistance**: A one-way hash of the SEP-12 customer identity can claim the subsidy only once
+- **Commitment replay guard**: Submitted commitment payloads cannot be reused
+- **Identity-hash duplicate guard**: Repeated submitted hashes are rejected; the contract does not yet verify an Anchor signature, so this is not complete Sybil resistance
 - **Explainable AI**: SHAP values show per-feature contribution to every score
 
 ## Regulatory Boundary
@@ -192,7 +192,7 @@ Vela is a testnet risk-signal and collateral-routing MVP; it is not the licensed
 
 | Score | Trust Level | Subsidy | User Provides |
 |-------|------------|---------|---------------|
-| 60-100 | Qualified | 40% | 60% collateral |
+| 60-100 | Client-claimed threshold met (MVP) | 40% of user amount | 71.4% of total collateral |
 | 0-59 | Insufficient | Rejected | — |
 
 ---
@@ -212,7 +212,7 @@ Vela is a testnet risk-signal and collateral-routing MVP; it is not the licensed
 Live testnet evidence:
 
 - [Gatekeeper deployment](https://stellar.expert/explorer/testnet/tx/f924cb43d67a19aeec69a8d76e35c366bea5c71416cac0b11dbf51a25544b0c5)
-- [Blend-backed position with identity binding](https://stellar.expert/explorer/testnet/tx/bcec10737c1f4f538c142eca78c7de9540f9746d7e21f0680ff808ad7e84ab39)
+- [Blend collateral-supply fixture (empty proof / zero identity)](https://stellar.expert/explorer/testnet/tx/bcec10737c1f4f538c142eca78c7de9540f9746d7e21f0680ff808ad7e84ab39)
 
 ---
 
@@ -226,9 +226,9 @@ Live testnet evidence:
 
 ## 🏆 Hackathon Criteria Alignment
 
-- **Integration**: Blend v2 — load-bearing (credit mechanism runs through Blend)
+- **Integration**: Blend v2 — real collateral supply through the Soroban gatekeeper
 - **Anchor/Local Payments**: TR Mock Anchor — SEP-6/10 (TRY bank side sandbox, Stellar USDC leg real on testnet)
-- **Core Feature**: Without Blend, the credit mechanism doesn't work
+- **Core Feature**: Blend is the destination of the verified collateral-supply path; lending lifecycle remains roadmap work
 - **Current verification**: Live test script covers Friendbot, trustline, SEP-10, SEP-6 deposit polling, and SEP-6 withdrawal payment polling
 - **Roadmap**: Full Groth16/zkML verification, Blend borrow/repay, production anchor partnership, and mainnet pilot
 

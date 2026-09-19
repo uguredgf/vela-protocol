@@ -10,6 +10,7 @@ const POSITION_TX = 'https://stellar.expert/explorer/testnet/tx/bcec10737c1f4f53
 
 type VerificationState = {
   service: 'checking' | 'online' | 'offline';
+  scoreState: 'checking' | 'available' | 'insufficient' | 'error';
   score?: number;
   tier?: string;
   txCount?: number;
@@ -18,7 +19,7 @@ type VerificationState = {
 
 export const EvidencePanel: React.FC = () => {
   const navigate = useNavigate();
-  const [verification, setVerification] = useState<VerificationState>({ service: 'checking' });
+  const [verification, setVerification] = useState<VerificationState>({ service: 'checking', scoreState: 'checking' });
 
   useEffect(() => {
     let active = true;
@@ -26,16 +27,17 @@ export const EvidencePanel: React.FC = () => {
       const healthy = await checkHealth();
       if (!active) return;
       if (!healthy) {
-        setVerification({ service: 'offline' });
+        setVerification({ service: 'offline', scoreState: 'error', scoreError: 'Scoring service health check failed.' });
         return;
       }
 
-      setVerification({ service: 'online' });
+      setVerification({ service: 'online', scoreState: 'checking' });
       try {
         const result = await getScoreByAccountId(TEST_ACCOUNT);
         if (active) {
           setVerification({
             service: 'online',
+            scoreState: 'available',
             score: result.score,
             tier: result.tier,
             txCount: result.features?.tx_count,
@@ -45,6 +47,7 @@ export const EvidencePanel: React.FC = () => {
         if (active) {
           setVerification({
             service: 'online',
+            scoreState: error instanceof Error && error.message.toLowerCase().includes('insufficient') ? 'insufficient' : 'error',
             scoreError: error instanceof Error ? error.message : 'Live score check failed',
           });
         }
@@ -59,11 +62,11 @@ export const EvidencePanel: React.FC = () => {
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto space-y-6 pb-12">
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-2 text-sm text-accent">
-          <ShieldCheck size={18} /> Verifiable demo mode
+          <ShieldCheck size={18} /> Independent judge view
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold">Live Testnet Evidence</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">Evidence, with boundaries</h1>
         <p className="text-gray-400 max-w-2xl mx-auto">
-          This page remains accessible without a wallet so judges can independently verify the deployed services and on-chain transactions. It does not simulate a completed user flow.
+          This wallet-free page separates what can be independently verified from what remains a hackathon prototype. It is not a simulated completion screen.
         </p>
       </div>
 
@@ -81,33 +84,38 @@ export const EvidencePanel: React.FC = () => {
         </div>
 
         <div className="glass-panel p-5">
-          <div className="text-sm text-gray-400">Real Horizon score check</div>
+          <div className="text-sm text-gray-400">Minimum-history gate</div>
           <div className="mt-3 text-2xl font-bold">
-            {verification.score === undefined ? '—' : verification.score.toFixed(1)}
+            {verification.scoreState === 'checking' ? 'Checking…'
+              : verification.scoreState === 'insufficient' ? 'Insufficient'
+              : verification.scoreState === 'error' ? 'Unavailable'
+              : verification.score?.toFixed(1)}
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            {verification.score !== undefined
+            {verification.scoreState === 'available'
               ? `${verification.tier} tier · ${verification.txCount ?? 'unknown'} observed transactions`
-              : verification.scoreError || 'Waiting for the public testnet account result.'}
+              : verification.scoreState === 'checking'
+                ? 'Reading the public test account from Horizon.'
+                : verification.scoreError}
           </p>
-          <p className="text-[11px] text-gray-600 mt-2">Public test account only; this is not the viewer's credit score.</p>
+          <p className="text-[11px] text-gray-600 mt-2">Sparse or Friendbot-only accounts must not receive a score.</p>
         </div>
 
         <div className="glass-panel p-5">
-          <div className="text-sm text-gray-400">Identity-bound gatekeeper</div>
+          <div className="text-sm text-gray-400">Gatekeeper contract</div>
           <div className="mt-3 flex items-center gap-2 font-semibold"><CheckCircle2 className="text-success" size={18} /> Deployed on testnet</div>
-          <p className="text-xs text-gray-500 mt-2">A repeated identity hash is rejected with contract error #12.</p>
+          <p className="text-xs text-gray-500 mt-2">It rejects a repeated submitted hash. The hash's Anchor origin is not attested on-chain yet.</p>
         </div>
       </div>
 
       <div className="glass-panel p-6 space-y-4">
-        <h2 className="text-xl font-bold">Independent transaction proof</h2>
+        <h2 className="text-xl font-bold">Independent transaction evidence</h2>
         <a href={GATEKEEPER_TX} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-4 rounded-lg bg-surface p-4 hover:bg-white/5">
-          <span><strong>Gatekeeper deployment</strong><span className="block text-xs text-gray-500 mt-1">Identity-bound Soroban contract</span></span>
+          <span><strong>Gatekeeper deployment</strong><span className="block text-xs text-gray-500 mt-1">Deployed Soroban contract; deployment alone does not prove eligibility</span></span>
           <ExternalLink className="text-accent shrink-0" size={18} />
         </a>
         <a href={POSITION_TX} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-4 rounded-lg bg-surface p-4 hover:bg-white/5">
-          <span><strong>Blend-backed position</strong><span className="block text-xs text-gray-500 mt-1">Successful gatekeeper call and collateral supply</span></span>
+          <span><strong>Blend collateral-supply fixture</strong><span className="block text-xs text-gray-500 mt-1">Real 1.0 XLM user input + 0.4 XLM subsidy supplied to Blend; no borrow</span></span>
           <ExternalLink className="text-accent shrink-0" size={18} />
         </a>
       </div>
@@ -116,8 +124,10 @@ export const EvidencePanel: React.FC = () => {
         <h2 className="font-bold flex items-center gap-2"><AlertTriangle className="text-amber-400" size={19} /> MVP boundaries</h2>
         <ul className="mt-3 space-y-2 text-sm text-gray-400 list-disc pl-5">
           <li>The commitment and threshold claim are not yet verified by a full Groth16/zkML verifier.</li>
-          <li>The displayed borrow limit is an estimate; the verified on-chain path supplies collateral to Blend.</li>
-          <li>The TRY bank rail is an Anchor sandbox; Stellar-side testnet settlement is independently verifiable.</li>
+          <li>The contract prevents duplicate submitted identity hashes but does not verify an Anchor attestation.</li>
+          <li>The published fixture uses an empty proof and zero identity hash; it proves only the collateral-supply integration.</li>
+          <li>Borrow, repay, and user withdrawal are not implemented; the displayed capacity is an estimate.</li>
+          <li>The TRY bank rail is an Anchor sandbox and economically separate from Blend; linked Stellar payments remain verifiable.</li>
         </ul>
       </div>
 

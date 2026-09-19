@@ -101,13 +101,13 @@ export const PasskeyLogin: React.FC = () => {
             Credit signals with<br className="hidden sm:block" /> <span className="gradient-text">privacy built in.</span>
           </h1>
           <p className="text-gray-400 mb-7 text-base md:text-lg max-w-2xl leading-relaxed">
-            Turn real Stellar activity into an explainable risk signal, bind subsidies to verified identities, and route collateral through Blend v2.
+            Read eligible Stellar payment history into a demonstrative risk signal, prepare a private commitment, and verify a real collateral-supply path through Blend v2.
           </p>
 
           <div className="grid grid-cols-3 gap-2 md:gap-3 w-full">
             <div className="metric-chip"><strong>AI</strong><span>Explainable score</span></div>
-            <div className="metric-chip"><strong>1:1</strong><span>Identity bound</span></div>
-            <div className="metric-chip"><strong>Live</strong><span>Testnet proof</span></div>
+            <div className="metric-chip"><strong>Local</strong><span>Score commitment</span></div>
+            <div className="metric-chip"><strong>Live</strong><span>Testnet transaction</span></div>
           </div>
         </div>
 
@@ -115,7 +115,7 @@ export const PasskeyLogin: React.FC = () => {
         <div className="flex items-center justify-between mb-1 px-1">
           <div className="text-left">
             <p className="font-semibold">Choose a secure entry</p>
-            <p className="text-xs text-gray-500 mt-0.5">No password. Your signing method stays yours.</p>
+            <p className="text-xs text-gray-500 mt-0.5">Passkey secures entry; MVP protocol calls use a session-scoped testnet G-account.</p>
           </div>
           <span className="status-badge">MVP</span>
         </div>
@@ -167,6 +167,7 @@ export const PasskeyLogin: React.FC = () => {
           <ShieldCheck size={20} />
           View Live Testnet Evidence
         </button>
+        <p className="text-[11px] leading-relaxed text-gray-500 px-2">A signal requires at least 5 non-bootstrap payments spanning 7 days. New or Friendbot-only accounts return “insufficient history,” not a score.</p>
         </div>
       </div>
     </motion.div>

@@ -18,7 +18,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           <ProtocolCore />
           <div>
             <span className="block text-lg font-bold tracking-tight gradient-text">Vela Protocol</span>
-            <span className="hidden sm:block text-[10px] uppercase tracking-[0.2em] text-gray-500">Private credit layer · Stellar testnet</span>
+            <span className="hidden sm:block text-[10px] uppercase tracking-[0.2em] text-gray-500">Private risk signal · Stellar testnet</span>
           </div>
         </div>
         {displayAddress && (
