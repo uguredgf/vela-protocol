@@ -8,6 +8,7 @@ import { withdrawToAnchor } from '../services/anchorPayment';
 import { Keypair, Transaction, Networks } from '@stellar/stellar-sdk';
 import { signWithFreighter } from '../services/freighter';
 import { getExplorerUrl } from '../services/stellar';
+import { formatAnchorStatus } from '../utils/status';
 
 type DepositStep = 'idle' | 'authenticating' | 'requesting' | 'awaiting_bank' | 'simulating' | 'polling' | 'completed' | 'error';
 type TransferMode = 'deposit' | 'withdraw';
@@ -108,6 +109,7 @@ export const AnchorTransfer: React.FC = () => {
         asset: 'USDC',
         startedAt: result.status.started_at || new Date().toISOString(),
         completedAt: result.status.completed_at,
+        txHash: result.hash,
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Withdrawal failed');
@@ -320,7 +322,7 @@ export const AnchorTransfer: React.FC = () => {
               <RefreshCcw className="animate-spin text-blue-400" size={18} />
               <div>
                 <p className="text-sm text-blue-300 font-semibold">Waiting for Anchor confirmation...</p>
-                <p className="text-xs text-gray-400">Status: {finalStatus || 'polling...'}</p>
+                <p className="text-xs text-gray-400">{formatAnchorStatus(finalStatus)}</p>
               </div>
             </div>
           )}
@@ -348,7 +350,7 @@ export const AnchorTransfer: React.FC = () => {
                 <CheckCircle className="text-green-400" size={20} />
                 <p className="text-green-300 font-semibold">USDC Payment Submitted</p>
               </div>
-              <p className="text-sm text-gray-300">Anchor status: {finalStatus}</p>
+              <p className="text-sm text-gray-300">Anchor: {formatAnchorStatus(finalStatus)}</p>
               <a href={getExplorerUrl(withdrawHash)} target="_blank" rel="noreferrer"
                 className="block text-xs text-accent underline break-all">
                 View payment transaction: {withdrawHash}

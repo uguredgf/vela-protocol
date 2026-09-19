@@ -91,6 +91,7 @@ export interface AnchorTransaction {
   asset: string;
   startedAt: string;
   completedAt?: string;
+  txHash?: string;
 }
 
 // ─── ZK Proof Types ─────────────────────────────────────────────────────────

@@ -4,6 +4,7 @@ import { ClassicAccount } from '../services/classicAccount';
 import { Keypair, StrKey } from '@stellar/stellar-sdk';
 
 const SESSION_KEY = 'vela:testnet:session:v2';
+const ANCHOR_TRANSACTIONS_KEY = 'vela:testnet:anchor-transactions:v1';
 const positionKey = (address: string) => `vela:testnet:demo-position:${address}`;
 type AuthMethod = 'passkey' | 'freighter';
 
@@ -40,6 +41,15 @@ function restoreSession(): { walletAddress: string | null; classicAccount: Class
 }
 
 const restored = restoreSession();
+
+function restoreAnchorTransactions(): AnchorTransaction[] {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(ANCHOR_TRANSACTIONS_KEY) || '[]');
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
 
 interface VelaStore {
   isAuthenticated: boolean;
@@ -95,10 +105,12 @@ export const useStore = create<VelaStore>((set) => ({
   collateralAmount: 0,
   subsidyAmount: 0,
   anchorJwt: null,
-  anchorTransactions: [],
-  recordAnchorTransaction: (transaction) => set(state => ({
-    anchorTransactions: [...state.anchorTransactions.filter(item => item.id !== transaction.id), transaction],
-  })),
+  anchorTransactions: restoreAnchorTransactions(),
+  recordAnchorTransaction: (transaction) => set(state => {
+    const transactions = [...state.anchorTransactions.filter(item => item.id !== transaction.id), transaction];
+    sessionStorage.setItem(ANCHOR_TRANSACTIONS_KEY, JSON.stringify(transactions));
+    return { anchorTransactions: transactions };
+  }),
   currentStep: 0,
   loading: false,
   error: null,
@@ -107,12 +119,12 @@ export const useStore = create<VelaStore>((set) => ({
     sessionStorage.setItem(SESSION_KEY, JSON.stringify({ method: 'passkey-kit', walletAddress: address, publicKey: classicAccount.publicKey }));
     set({ isAuthenticated: true, walletAddress: address, classicAccount, authMethod: 'passkey', passkeyConnected: true,
       score: null, scoreExplanation: null, features: null, proofData: null, publicInputs: null, proofGenerated: false,
-      position: restorePosition(classicAccount.publicKey), anchorTransactions: [], identityHash: null, identityVerified: false });
+      position: restorePosition(classicAccount.publicKey), anchorTransactions: restoreAnchorTransactions(), identityHash: null, identityVerified: false });
   },
   setFreighterAuth: (publicKey) => {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify({ method: 'freighter', publicKey }));
     set({ isAuthenticated: true, walletAddress: null, classicAccount: { publicKey }, authMethod: 'freighter', passkeyConnected: false,
-    score: null, scoreExplanation: null, features: null, proofData: null, publicInputs: null, proofGenerated: false, position: null, anchorTransactions: [], identityHash: null, identityVerified: false });
+    score: null, scoreExplanation: null, features: null, proofData: null, publicInputs: null, proofGenerated: false, position: null, anchorTransactions: restoreAnchorTransactions(), identityHash: null, identityVerified: false });
   },
   setScore: (score, explanation, features) => set({ score, scoreExplanation: explanation, features }),
   setIdentity: (identityHash) => set({ identityHash, identityVerified: true }),
@@ -128,6 +140,7 @@ export const useStore = create<VelaStore>((set) => ({
       sessionStorage.removeItem(`vela:testnet:classic:${state.walletAddress}`);
     }
     if (state.classicAccount) sessionStorage.removeItem(positionKey(state.classicAccount.publicKey));
+    sessionStorage.removeItem(ANCHOR_TRANSACTIONS_KEY);
     return {
     isAuthenticated: false, walletAddress: null, classicAccount: null, authMethod: null, passkeyConnected: false,
     score: null, scoreExplanation: null, features: null, identityHash: null, identityVerified: false,

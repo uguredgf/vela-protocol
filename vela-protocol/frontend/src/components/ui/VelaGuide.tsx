@@ -25,12 +25,7 @@ export const VelaGuide: React.FC = () => {
       role="status"
       aria-label={`${copy.eyebrow}: ${copy.message}`}
     >
-      <div className="vela-guide__orb" aria-hidden="true">
-        <span className="vela-guide__antenna" />
-        <span className="vela-guide__eye vela-guide__eye--left" />
-        <span className="vela-guide__eye vela-guide__eye--right" />
-        <span className="vela-guide__smile" />
-      </div>
+      <img className="vela-guide__mascot" src="/vela-mascot.png" alt="" aria-hidden="true" />
       <div className="vela-guide__copy">
         <span>{copy.eyebrow}</span>
         <strong>{copy.message}</strong>
