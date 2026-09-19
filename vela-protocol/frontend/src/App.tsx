@@ -7,6 +7,7 @@ import { ProofGenerator } from './components/ProofGenerator';
 import { BlendPosition } from './components/BlendPosition';
 import { AnchorTransfer } from './components/AnchorTransfer';
 import { TransparencyPanel } from './components/TransparencyPanel';
+import { EvidencePanel } from './components/EvidencePanel';
 import { useStore } from './store/useStore';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<PasskeyLogin />} />
+        <Route path="/evidence" element={<EvidencePanel />} />
         <Route path="/score" element={isAuthenticated ? <ScoreDisplay /> : <Navigate to="/" replace />} />
         <Route path="/proof" element={isAuthenticated ? <ProofGenerator /> : <Navigate to="/" replace />} />
         <Route path="/position" element={isAuthenticated ? <BlendPosition /> : <Navigate to="/" replace />} />

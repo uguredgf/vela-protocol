@@ -144,11 +144,13 @@ Configure these Vercel environment variables:
 
 ```text
 VITE_GATEKEEPER_CONTRACT_ID=CCSDVXSUOS2P7PJZASQ7XZ27BYOMRWUNJPBMBK3AMF6PFWXT5VPU7ZMB
-VITE_SCORING_API_URL=https://your-fastapi-service.example
+VITE_SCORING_API_URL=https://vela-ai-scoring.vercel.app
 VITE_DEMO_MODE=false
 ```
 
-The FastAPI scoring service is a separate continuously running process. Deploy `ai-scoring/` to Render, Railway, Fly.io, or run it locally; the static Vercel frontend cannot provide that process.
+The FastAPI scoring service is deployed separately at `https://vela-ai-scoring.vercel.app`. Its Vercel entrypoint lives under `ai-scoring/api/`; it can also be run locally with Uvicorn.
+
+The public `/evidence` route checks the deployed model and a real Horizon-backed test account at runtime, and links directly to the verified Stellar Expert transactions. It is an evidence surface, not a mocked replacement for the interactive flow.
 
 ---
 

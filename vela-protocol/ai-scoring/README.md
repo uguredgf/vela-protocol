@@ -26,3 +26,13 @@ uvicorn server:app --reload
 - `GET /model-info` : Model metadata and Responsible AI constraints.
 - `GET /score/{account_id}` : Live scoring by fetching on-chain data from Stellar Horizon testnet.
 - `POST /score` : Submit custom transaction arrays for instantaneous scoring.
+
+## Deployment
+
+The public Vercel deployment is available at:
+
+```text
+https://vela-ai-scoring.vercel.app
+```
+
+`api/index.py` exports the existing FastAPI application for Vercel. `vercel.json` routes API requests to that entrypoint; the core scoring logic remains shared with local Uvicorn development.

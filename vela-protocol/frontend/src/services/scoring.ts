@@ -2,7 +2,11 @@ import axios from 'axios';
 import { ScoreResult, ModelInfo, StellarTransaction } from '../types';
 import { StrKey } from '@stellar/stellar-sdk';
 
-const API_BASE = import.meta.env.VITE_SCORING_API_URL || 'http://localhost:8000';
+const DEFAULT_API_BASE = import.meta.env.PROD
+  ? 'https://vela-ai-scoring.vercel.app'
+  : 'http://127.0.0.1:8001';
+
+export const SCORING_API_URL = (import.meta.env.VITE_SCORING_API_URL || DEFAULT_API_BASE).replace(/\/$/, '');
 
 /**
  * Get creditworthiness score for an account.
@@ -20,7 +24,7 @@ export async function getScore(
       payload.transactions = transactions;
     }
 
-    const res = await axios.post(`${API_BASE}/score`, payload, {
+    const res = await axios.post(`${SCORING_API_URL}/score`, payload, {
       timeout: 30000,
     });
 
@@ -36,7 +40,7 @@ export async function getScore(
 export async function getScoreByAccountId(accountId: string): Promise<ScoreResult> {
   if (!StrKey.isValidEd25519PublicKey(accountId)) throw new Error('Scoring requires a valid classic G-address');
   try {
-    const res = await axios.get(`${API_BASE}/score/${accountId}`, {
+    const res = await axios.get(`${SCORING_API_URL}/score/${accountId}`, {
       timeout: 30000,
     });
     return res.data as ScoreResult;
@@ -50,7 +54,7 @@ export async function getScoreByAccountId(accountId: string): Promise<ScoreResul
  */
 export async function getModelInfo(): Promise<ModelInfo> {
   try {
-    const res = await axios.get(`${API_BASE}/model-info`);
+    const res = await axios.get(`${SCORING_API_URL}/model-info`);
     return res.data as ModelInfo;
   } catch (error) {
     throw error;
@@ -62,7 +66,7 @@ export async function getModelInfo(): Promise<ModelInfo> {
  */
 export async function checkHealth(): Promise<boolean> {
   try {
-    const res = await axios.get(`${API_BASE}/health`, { timeout: 5000 });
+    const res = await axios.get(`${SCORING_API_URL}/health`, { timeout: 20000 });
     return res.data.status === 'ok';
   } catch {
     return false;

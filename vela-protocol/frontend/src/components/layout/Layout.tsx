@@ -3,9 +3,11 @@ import { Stepper } from './Stepper';
 import { useStore } from '../../store/useStore';
 import { AnimatedBackground } from '../ui/AnimatedBackground';
 import { ProtocolCore } from '../ui/ProtocolCore';
+import { useLocation } from 'react-router-dom';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { walletAddress, classicAccount } = useStore();
+  const location = useLocation();
   const displayAddress = walletAddress || classicAccount?.publicKey;
 
   return (
@@ -27,7 +29,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </header>
       
       <main className="flex-1 flex flex-col p-6 max-w-5xl mx-auto w-full gap-8">
-        <Stepper />
+        {location.pathname !== '/evidence' && <Stepper />}
         <div className="flex-1">
           {children}
         </div>

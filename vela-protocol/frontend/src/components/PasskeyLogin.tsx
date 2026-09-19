@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { assertPasskeyEnvironment, createWallet, connectWallet } from '../services/passkey';
 import { bindClassicAccount, createFundedClassicAccount, PENDING_DEPLOY_SOURCE_KEY, provisionClassicAccount, restorePendingClassicAccount } from '../services/classicAccount';
 import { connectFreighter } from '../services/freighter';
-import { Fingerprint, Wallet } from 'lucide-react';
+import { Fingerprint, ShieldCheck, Wallet } from 'lucide-react';
 
 export const PasskeyLogin: React.FC = () => {
   const { setAuth, setFreighterAuth, isAuthenticated, classicAccount } = useStore();
@@ -135,6 +135,15 @@ export const PasskeyLogin: React.FC = () => {
         >
           <Wallet size={20} />
           Connect Freighter
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/evidence')}
+          className="border border-accent/40 bg-accent/10 hover:bg-accent/20 text-accent p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
+        >
+          <ShieldCheck size={20} />
+          View Live Testnet Evidence
         </button>
       </div>
     </motion.div>
