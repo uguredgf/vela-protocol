@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
+import { Vela3D } from './Vela3D';
 
 const routeMessages: Record<string, { eyebrow: string; message: string }> = {
   '/': { eyebrow: 'Vela guide', message: 'Choose a secure way in' },
@@ -36,11 +37,11 @@ export const VelaGuide: React.FC = () => {
       role="status"
       aria-label={`${copy.eyebrow}: ${copy.message}`}
     >
-      <div className="vela-guide__scene" aria-hidden="true">
+      <div className="vela-guide__scene">
         <span className="vela-guide__orbit" /><span className="vela-guide__spark vela-guide__spark--one" /><span className="vela-guide__spark vela-guide__spark--two" />
-        <motion.img className="vela-guide__mascot" src="/vela-mascot.png" alt="" animate={completion ? { y: [0, -8, 0], rotateZ: [-2, 2, -2], scale: [1, 1.04, 1] } : { y: [0, -4, 0], rotateY: [-5, 8, -5] }} transition={{ duration: completion ? 1.7 : 3.2, repeat: Infinity, ease: 'easeInOut' }} />
+        <Vela3D className="vela-guide__mascot" active={!completion} celebration={!!completion} />
       </div>
-      <div className="vela-guide__copy">
+      <div className="vela-guide__copy" aria-hidden="true">
         <span>{copy.eyebrow}</span>
         <strong>{copy.message}</strong>
       </div>

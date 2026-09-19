@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { getScore } from '../services/scoring';
 import { ArrowDownRight, ArrowUpRight, Info, RefreshCcw, ShieldCheck } from 'lucide-react';
 import { Card3D } from './ui/Card3D';
+import { Vela3D } from './ui/Vela3D';
 
 const FEATURE_LABELS: Record<string, string> = {
   tx_count: 'Activity history', tx_frequency: 'Payment frequency', tx_regularity: 'Transaction regularity',
@@ -49,7 +50,7 @@ export const ScoreDisplay: React.FC = () => {
   const getTier = (value: number) => value >= 80 ? 'Strong signal' : value >= 60 ? 'Developing signal' : value >= 40 ? 'Limited signal' : 'Not enough signal';
 
   if (isLoading || score === null) return <div className="score-loader" role="status" aria-live="polite">
-    <div className="score-loader__stage"><span className="score-loader__ring score-loader__ring--one" /><span className="score-loader__ring score-loader__ring--two" /><motion.img src="/vela-mascot.png" alt="Vela is analysing your account" animate={{ y: [0, -7, 0], rotate: [-1, 1, -1] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} /></div>
+    <div className="score-loader__stage"><span className="score-loader__ring score-loader__ring--one" /><span className="score-loader__ring score-loader__ring--two" /><Vela3D active /></div>
     <h2 className="text-xl font-semibold">Reading your Stellar activity…</h2>
     <p className="text-gray-400 mt-2">Vela is turning on-chain patterns into a private credit signal.</p>
   </div>;

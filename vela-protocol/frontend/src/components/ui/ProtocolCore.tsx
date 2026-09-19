@@ -10,9 +10,9 @@ export const ProtocolCore: React.FC<{ variant?: 'header' | 'hero'; active?: bool
       <svg viewBox="0 0 48 48" role="presentation">
         <defs>
           <linearGradient id={gradientId} x1="9" y1="5" x2="39" y2="43" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#8B83D7" />
-            <stop offset=".55" stopColor="#655DB0" />
-            <stop offset="1" stopColor="#2E8B75" />
+            <stop stopColor="#7A2938" />
+            <stop offset=".55" stopColor="#A56F42" />
+            <stop offset="1" stopColor="#1D5660" />
           </linearGradient>
         </defs>
         <circle className="protocol-core__signal" cx="24" cy="24" r="20" />

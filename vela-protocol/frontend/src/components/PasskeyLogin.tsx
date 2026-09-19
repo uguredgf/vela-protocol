@@ -7,6 +7,7 @@ import { bindClassicAccount, createFundedClassicAccount, PENDING_DEPLOY_SOURCE_K
 import { connectFreighter } from '../services/freighter';
 import { Fingerprint, ShieldCheck, Wallet } from 'lucide-react';
 import { ProtocolCore } from './ui/ProtocolCore';
+import { Vela3D } from './ui/Vela3D';
 
 export const PasskeyLogin: React.FC = () => {
   const { setAuth, setFreighterAuth, isAuthenticated, classicAccount } = useStore();
@@ -91,7 +92,7 @@ export const PasskeyLogin: React.FC = () => {
             <div className="hero-mark"><ProtocolCore variant="hero" active={isConnecting} /></div>
             <div className="login-identity-flow__line"><span /><span /><span /></div>
             <div className="login-identity-flow__labels"><span>Passkey</span><span>Stellar account</span><span>Private signal</span></div>
-            <motion.img className="login-mascot" src="/vela-mascot.png" alt="Vela protocol guide" animate={isConnecting ? { x: [0, 12, 0], y: [0, -7, 0], rotateY: [0, 20, 0] } : { x: [0, 5, -3, 0], y: [0, -6, -2, 0], rotateY: [-10, 14, -7, -10], rotateZ: [-1.5, 1.5, -1, -1.5] }} transition={{ duration: isConnecting ? 1.4 : 4.8, repeat: Infinity, ease: 'easeInOut' }} />
+            <Vela3D className="login-mascot" active={isConnecting} celebration={isAuthenticated} />
           </div>
           <div className="eyebrow mb-4">
             <span className="eyebrow__dot" /> Verified on Stellar testnet
