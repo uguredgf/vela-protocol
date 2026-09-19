@@ -27,5 +27,6 @@
 .DS_Store
 Thumbs.db
 .vercel/
+presentation-private/
 
 .vercel

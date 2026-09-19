@@ -98,7 +98,7 @@ export const BlendPosition: React.FC = () => {
             {guidedDemo ? (
               <div className="space-y-3">
                 <a href={PUBLIC_SUPPLY_FIXTURE} target="_blank" rel="noreferrer" className="w-full border border-accent/25 bg-accent/10 p-4 rounded-xl font-semibold inline-flex items-center justify-center gap-2 text-accent">Inspect real Blend supply fixture <ExternalLink size={16} /></a>
-                <p className="text-xs text-gray-500 text-center">Existing testnet fixture: 1.0 XLM user input + 0.4 XLM subsidy supplied to Blend. It uses an empty proof and zero identity hash, so it demonstrates only integration.</p>
+                <p className="text-xs text-gray-500 text-center">Existing testnet fixture: 1.0 XLM user input + 0.4 XLM subsidy supplied to Blend. It uses a one-byte placeholder proof and zero identity hash, so it demonstrates only integration.</p>
                 <button type="button" onClick={() => navigate('/anchor')} className="w-full bg-surface hover:bg-surface/80 border border-white/10 py-4 rounded-lg font-semibold">Explore separate Anchor rail</button>
               </div>
             ) : (

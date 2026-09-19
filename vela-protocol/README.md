@@ -150,7 +150,7 @@ VITE_DEMO_MODE=false
 
 The FastAPI scoring service is deployed separately at `https://vela-ai-scoring.vercel.app`. Its Vercel entrypoint lives under `ai-scoring/api/`; it can also be run locally with Uvicorn.
 
-The public `/evidence` route checks the deployed model service and demonstrates that sparse accounts are rejected, then links directly to verified Stellar Expert transactions. The published position fixture proves the collateral-supply integration only; it uses an empty proof and zero identity hash and is labeled accordingly.
+The public `/evidence` route checks the deployed model service and demonstrates that sparse accounts are rejected, then links directly to verified Stellar Expert transactions. The published position fixture proves the collateral-supply integration only; it uses a one-byte placeholder proof and zero identity hash and is labeled accordingly.
 
 ---
 
@@ -212,7 +212,7 @@ Vela is a testnet risk-signal and collateral-routing MVP; it is not the licensed
 Live testnet evidence:
 
 - [Gatekeeper deployment](https://stellar.expert/explorer/testnet/tx/f924cb43d67a19aeec69a8d76e35c366bea5c71416cac0b11dbf51a25544b0c5)
-- [Blend collateral-supply fixture (empty proof / zero identity)](https://stellar.expert/explorer/testnet/tx/bcec10737c1f4f538c142eca78c7de9540f9746d7e21f0680ff808ad7e84ab39)
+- [Blend collateral-supply fixture (placeholder proof / zero identity)](https://stellar.expert/explorer/testnet/tx/bcec10737c1f4f538c142eca78c7de9540f9746d7e21f0680ff808ad7e84ab39)
 
 ---
 

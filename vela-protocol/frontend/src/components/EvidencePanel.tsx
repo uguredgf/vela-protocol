@@ -125,7 +125,7 @@ export const EvidencePanel: React.FC = () => {
         <ul className="mt-3 space-y-2 text-sm text-gray-400 list-disc pl-5">
           <li>The commitment and threshold claim are not yet verified by a full Groth16/zkML verifier.</li>
           <li>The contract prevents duplicate submitted identity hashes but does not verify an Anchor attestation.</li>
-          <li>The published fixture uses an empty proof and zero identity hash; it proves only the collateral-supply integration.</li>
+          <li>The published fixture uses a one-byte placeholder proof and zero identity hash; it proves only the collateral-supply integration.</li>
           <li>Borrow, repay, and user withdrawal are not implemented; the displayed capacity is an estimate.</li>
           <li>The TRY bank rail is an Anchor sandbox and economically separate from Blend; linked Stellar payments remain verifiable.</li>
         </ul>
