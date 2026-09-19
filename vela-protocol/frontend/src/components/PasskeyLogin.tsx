@@ -82,21 +82,36 @@ export const PasskeyLogin: React.FC = () => {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="aurora-stage flex flex-col items-center justify-center text-center max-w-2xl mx-auto py-12"
+      className="aurora-stage flex flex-col items-center justify-center text-center max-w-3xl mx-auto py-8 md:py-14"
     >
-      <div className="w-24 h-24 rounded-full bg-accent/20 flex items-center justify-center mb-6">
-        <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-3xl font-bold">
-          V
-        </div>
+      <div className="hero-mark mb-7" aria-hidden="true">
+        <div className="hero-mark__orbit" />
+        <div className="hero-mark__core">V</div>
       </div>
-      <h1 className="text-4xl md:text-5xl font-bold mb-4">
-        Welcome to <span className="gradient-text">Vela</span>
+      <div className="eyebrow mb-4">
+        <span className="eyebrow__dot" /> Live on Stellar testnet
+      </div>
+      <h1 className="text-4xl md:text-6xl font-bold mb-5 tracking-[-0.04em] leading-[1.02]">
+        Credit signals with<br className="hidden sm:block" /> <span className="gradient-text">privacy built in.</span>
       </h1>
-      <p className="text-gray-400 mb-12 text-lg">
-        AI-powered trust scores, local score commitments, and testnet contract interactions on Stellar.
+      <p className="text-gray-400 mb-9 text-base md:text-lg max-w-2xl leading-relaxed">
+        Turn real Stellar activity into an explainable risk signal, bind subsidies to verified identities, and route collateral through Blend v2.
       </p>
 
-      <div className="glass-panel p-8 w-full max-w-md flex flex-col gap-4">
+      <div className="grid grid-cols-3 gap-2 md:gap-3 w-full max-w-xl mb-7">
+        <div className="metric-chip"><strong>AI</strong><span>Explainable score</span></div>
+        <div className="metric-chip"><strong>1:1</strong><span>Identity bound</span></div>
+        <div className="metric-chip"><strong>Live</strong><span>Testnet proof</span></div>
+      </div>
+
+      <div className="glass-panel login-panel p-5 md:p-7 w-full max-w-lg flex flex-col gap-3">
+        <div className="flex items-center justify-between mb-1 px-1">
+          <div className="text-left">
+            <p className="font-semibold">Choose a secure entry</p>
+            <p className="text-xs text-gray-500 mt-0.5">No password. Your signing method stays yours.</p>
+          </div>
+          <span className="status-badge">MVP</span>
+        </div>
         {error && <p role="alert" className="text-red-400 text-sm">{error}</p>}
         {isAuthenticated && classicAccount && (
           <button type="button" onClick={() => navigate('/score')}
@@ -107,7 +122,7 @@ export const PasskeyLogin: React.FC = () => {
         <button
           onClick={handleCreate}
           disabled={isConnecting}
-          className="bg-accent hover:bg-accent/80 text-white p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+          className="primary-action bg-accent hover:bg-accent/80 text-white p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
         >
           <Fingerprint size={20} />
           Create Passkey
@@ -116,7 +131,7 @@ export const PasskeyLogin: React.FC = () => {
         <button
           onClick={handleConnect}
           disabled={isConnecting}
-          className="bg-surface hover:bg-surface/80 border border-white/10 text-white p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+          className="secondary-action bg-surface hover:bg-surface/80 border border-white/10 text-white p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
         >
           <Fingerprint size={20} />
           Connect Passkey
@@ -131,7 +146,7 @@ export const PasskeyLogin: React.FC = () => {
         <button
           onClick={handleFreighter}
           disabled={isConnecting}
-          className="bg-surface hover:bg-surface/80 border border-white/10 text-white p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+          className="secondary-action bg-surface hover:bg-surface/80 border border-white/10 text-white p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
         >
           <Wallet size={20} />
           Connect Freighter

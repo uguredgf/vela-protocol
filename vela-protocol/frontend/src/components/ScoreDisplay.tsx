@@ -76,7 +76,7 @@ export const ScoreDisplay: React.FC = () => {
         <div className="flex flex-col items-center">
           <div className="relative w-48 h-48 flex items-center justify-center">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="#1A1A2E" strokeWidth="8" />
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#CBD3E0" strokeWidth="8" />
               <motion.circle 
                 initial={{ strokeDasharray: '0 300' }}
                 animate={{ strokeDasharray: `${score * 2.83} 300` }}

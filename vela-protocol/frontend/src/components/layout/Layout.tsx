@@ -12,23 +12,23 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   return (
     <AnimatedBackground className="min-h-screen flex flex-col font-sans">
-      <header className="w-full px-5 py-3 border-b border-white/10 glass-panel sticky top-0 z-10 flex justify-between items-center">
+      <header className="app-header w-full px-5 md:px-8 py-3 sticky top-0 z-20 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <ProtocolCore />
           <div>
             <span className="block text-lg font-bold tracking-tight gradient-text">Vela Protocol</span>
-            <span className="hidden sm:block text-[10px] uppercase tracking-[0.24em] text-gray-500">Private credit layer</span>
+            <span className="hidden sm:block text-[10px] uppercase tracking-[0.24em] text-gray-500">Private credit layer · Stellar testnet</span>
           </div>
         </div>
         {displayAddress && (
-          <div className="flex items-center gap-2 text-xs sm:text-sm bg-surface/80 px-3 py-2 rounded-full border border-white/10 shadow-inner shadow-white/[0.03]">
+          <div className="wallet-pill flex items-center gap-2 text-xs sm:text-sm px-3 py-2 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.8)]" />
             {displayAddress.substring(0, 6)}...{displayAddress.substring(displayAddress.length - 4)}
           </div>
         )}
       </header>
       
-      <main className="flex-1 flex flex-col p-6 max-w-5xl mx-auto w-full gap-8">
+      <main className="flex-1 flex flex-col px-4 py-6 md:px-8 md:py-8 max-w-5xl mx-auto w-full gap-8">
         {location.pathname !== '/evidence' && <Stepper />}
         <div className="flex-1">
           {children}
