@@ -54,7 +54,7 @@ export const ScoreDisplay: React.FC = () => {
     <p className="text-gray-400 mt-2">Vela is turning on-chain patterns into a private credit signal.</p>
   </div>;
 
-  return <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto space-y-6 pb-12">
+  return <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="score-page max-w-4xl mx-auto space-y-6 pb-12">
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 px-1">
       <div><div className="text-[11px] uppercase tracking-[0.25em] text-accent mb-2">On-chain signal</div><h1 className="text-3xl md:text-4xl font-bold tracking-tight">Your credit signal</h1><p className="text-gray-400 mt-2 max-w-xl">A live behavioural read of the Stellar account powering this session.</p></div>
       <div className="inline-flex items-center gap-2 text-xs text-emerald-300 bg-emerald-400/10 border border-emerald-400/20 px-3 py-2 rounded-full"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live Horizon data</div>
@@ -66,7 +66,6 @@ export const ScoreDisplay: React.FC = () => {
       </div>
       <div className="min-w-0"><h3 className="text-xl font-semibold mb-2 flex items-center gap-2"><ShieldCheck className="text-accent" /> What shaped your signal</h3><p className="text-sm text-gray-400 mb-4">The most influential account patterns, translated into plain language.</p>
         <div className="space-y-3">{rankedFactors.slice(0, 4).map(({ key, value }) => <div key={key} className="signal-factor"><span className={`signal-factor__icon ${value >= 0 ? 'is-positive' : 'is-negative'}`}>{value >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}</span><span className="flex-1 text-sm font-medium">{FEATURE_LABELS[key] || 'Account behaviour'}</span><span className={`text-xs font-semibold ${value >= 0 ? 'text-green-400' : 'text-red-400'}`}>{impactLabel(value)}</span></div>)}</div>
-        <details className="score-details mt-4"><summary>View technical model details</summary><div className="mt-3 space-y-2">{rankedFactors.map(({ key, value }) => <div key={key} className="flex justify-between gap-3 text-xs"><span>{FEATURE_LABELS[key] || key}</span><code>{value.toFixed(2)}</code></div>)}</div></details>
       </div>
     </Card3D>
     <div className="model-note glass-panel p-4 flex items-start gap-3"><Info className="text-accent flex-shrink-0 mt-0.5" size={19} /><div><strong className="text-sm">MVP model disclosure</strong><p className="text-xs text-gray-500 mt-1">Your account metrics are live and come from Stellar Horizon. The scoring model was trained on synthetic behaviour profiles for this hackathon MVP, so this signal is demonstrative—not a lending decision or measured prediction accuracy.</p></div></div>

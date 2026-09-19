@@ -12,7 +12,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const displayAddress = walletAddress || classicAccount?.publicKey;
 
   return (
-    <AnimatedBackground className="min-h-screen flex flex-col font-sans">
+    <AnimatedBackground className={`page-${location.pathname.split('/')[1] || 'login'} min-h-screen flex flex-col font-sans`}>
       <header className="app-header w-full px-5 md:px-8 py-3 sticky top-0 z-20 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <ProtocolCore />

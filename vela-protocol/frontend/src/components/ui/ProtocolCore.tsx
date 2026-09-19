@@ -15,12 +15,11 @@ export const ProtocolCore: React.FC<{ variant?: 'header' | 'hero'; active?: bool
             <stop offset="1" stopColor="#2E8B75" />
           </linearGradient>
         </defs>
-        <circle className="protocol-core__signal" cx="24" cy="24" r="21" />
-        <path className="protocol-core__shell" d="M24 3.5 42 14v20L24 44.5 6 34V14L24 3.5Z" fill={`url(#${gradientId})`} />
-        <path className="protocol-core__sail" d="m14.5 14.5 8.9 21.2c.3.8 1.4.8 1.8.1l9.1-21.3-10.1 8.2-9.7-8.2Z" />
-        <path className="protocol-core__wake" d="M17 31.8c4.8 2.1 9.5 2.1 14.2-.1" />
-        <circle className="protocol-core__star" cx="35.7" cy="10.8" r="2.2" />
-        <circle className="protocol-core__node" cx="24" cy="3" r="1.7" />
+        <circle className="protocol-core__signal" cx="24" cy="24" r="20" />
+        <path className="protocol-core__sail protocol-core__sail--left" d="M8 10.5 21.4 38c.8 1.7 3.2 1.7 4 0l3.2-6.6L17.7 10.5H8Z" fill={`url(#${gradientId})`} />
+        <path className="protocol-core__sail protocol-core__sail--right" d="M21 10.5h19L29.8 30.2 21 10.5Z" />
+        <path className="protocol-core__wake" d="M14 40c6.4 2.4 13.2 2.4 20 0" />
+        <circle className="protocol-core__node" cx="39" cy="8" r="2.4" />
       </svg>
     </div>
   );

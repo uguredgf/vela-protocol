@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { generateCommitment, generateRangeProof } from '../services/proof';
-import { Lock, Cpu, CheckCircle } from 'lucide-react';
+import { Lock, Cpu } from 'lucide-react';
 import { MultiStepLoader } from './ui/MultiStepLoader';
 
 export const ProofGenerator: React.FC = () => {
@@ -68,8 +68,8 @@ export const ProofGenerator: React.FC = () => {
 
         {status === 'done' && (
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6 py-4">
-            <div className="flex items-center justify-center gap-2 text-success">
-              <CheckCircle size={32} />
+            <div className="flex items-center justify-center gap-3 text-success">
+              <svg className="verified-check" viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="23" /><path d="m16 27 7 7 15-16" /></svg>
               <span className="text-xl font-semibold">Commitment Prepared</span>
             </div>
             
