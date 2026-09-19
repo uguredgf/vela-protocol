@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd vela-protocol/frontend && npm ci",
+  "buildCommand": "cd vela-protocol/frontend && npm run build",
+  "outputDirectory": "vela-protocol/frontend/dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
