@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
-import { Vela3D } from './Vela3D';
+import { VelaOracle } from './VelaOracle';
 
 const routeMessages: Record<string, { eyebrow: string; message: string }> = {
   '/': { eyebrow: 'Vela guide', message: 'Choose a secure way in' },
@@ -37,11 +37,8 @@ export const VelaGuide: React.FC = () => {
       role="status"
       aria-label={`${copy.eyebrow}: ${copy.message}`}
     >
-      <div className="vela-guide__scene">
-        <span className="vela-guide__orbit" /><span className="vela-guide__spark vela-guide__spark--one" /><span className="vela-guide__spark vela-guide__spark--two" />
-        <Vela3D className="vela-guide__mascot" active={!completion} celebration={!!completion} />
-      </div>
-      <div className="vela-guide__copy" aria-hidden="true">
+      <VelaOracle active={!completion} complete={!!completion} />
+      <div className="vela-guide__copy">
         <span>{copy.eyebrow}</span>
         <strong>{copy.message}</strong>
       </div>

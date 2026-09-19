@@ -224,7 +224,7 @@
 
 .score-loader { min-height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .score-loader__stage { position: relative; display: grid; place-items: center; width: 170px; height: 170px; margin-bottom: 1rem; }
-.score-loader__stage .vela-3d { position: relative; z-index: 2; width: 145px; height: 165px; filter: drop-shadow(0 16px 22px rgba(75,66,145,.2)); }
+.score-loader__stage .vela-oracle { position: relative; z-index: 2; width: 112px; height: 112px; }
 .score-loader__ring { position: absolute; inset: 16px; border: 1px solid rgba(108,99,168,.24); border-radius: 50%; animation: scan-breathe 2.4s ease-out infinite; }
 .score-loader__ring--two { inset: 2px; border-color: rgba(46,139,117,.18); animation-delay: .8s; }
 .signal-factor { display: flex; align-items: center; gap: .7rem; padding: .72rem .8rem; border: 1px solid rgba(69,82,108,.1); border-radius: .85rem; background: rgba(238,241,245,.62); }
@@ -305,8 +305,7 @@
 
 .login-identity-flow { position: relative; width: min(100%, 390px); min-height: 118px; display: grid; grid-template-columns: 96px 1fr 92px; align-items: center; gap: .55rem; perspective: 700px; }
 .hero-mark { display: grid; place-items: center; }
-.vela-3d canvas { display: block; width: 100%; height: 100%; }
-.login-mascot { width: 90px; height: 112px; filter: drop-shadow(0 15px 20px rgba(40,69,112,.2)); transform-style: preserve-3d; }
+.login-oracle { width: 88px; height: 88px; }
 .login-identity-flow__line { position: relative; height: 2px; background: linear-gradient(90deg, #4f7fb0, #2f9b83, #ff8f70); box-shadow: 0 0 15px rgba(47,155,131,.2); }
 .login-identity-flow__line span { position: absolute; top: 50%; width: 9px; height: 9px; border: 2px solid rgba(255,255,255,.9); border-radius: 50%; background: #3985a6; transform: translate(-50%,-50%); box-shadow: 0 0 0 4px rgba(57,133,166,.1); }
 .login-identity-flow__line span:nth-child(1) { left: 5%; }
@@ -433,50 +432,39 @@
 .route-shell { animation: route-reveal .45s cubic-bezier(.2,.75,.25,1) both; }
 
 .vela-guide {
-  position: fixed;
-  z-index: 30;
-  right: 1.25rem;
-  bottom: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: .7rem;
-  padding: 0;
-  border: 1px solid rgba(75,87,111,.16);
-  border-radius: 1.1rem;
-  background: transparent;
-  box-shadow: none;
-  border-color: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  pointer-events: none;
-  transition: right .7s cubic-bezier(.2,.8,.2,1), left .7s cubic-bezier(.2,.8,.2,1), bottom .7s cubic-bezier(.2,.8,.2,1);
-}
-.vela-guide--score { right: auto; left: 1.25rem; bottom: 18%; }
-.vela-guide--proof { right: 1.25rem; left: auto; bottom: 18%; }
-.vela-guide--position { right: auto; left: 1.25rem; bottom: 22%; }
-.vela-guide--anchor { right: 1.25rem; left: auto; bottom: 14%; }
-.vela-guide--transparency { right: auto; left: 1.25rem; bottom: 16%; }
-.vela-guide--evidence { right: 1.25rem; bottom: 18%; }
-.vela-guide__scene { position: relative; display: grid; place-items: center; width: 84px; height: 112px; perspective: 500px; }
-
-.vela-guide__mascot {
   position: relative;
   z-index: 2;
-  width: 84px;
-  height: 112px;
-  flex: 0 0 auto;
-  filter: drop-shadow(0 9px 14px rgba(74,66,121,.24));
+  display: flex;
+  align-items: center;
+  align-self: flex-end;
+  gap: .8rem;
+  width: fit-content;
+  margin: -1rem .25rem -1rem 0;
+  padding: .45rem .7rem .45rem .5rem;
+  border: 1px solid rgba(91,63,50,.13);
+  border-radius: 999px;
+  background: rgba(249,246,240,.62);
+  box-shadow: 0 9px 28px rgba(68,48,42,.07), inset 0 1px 0 rgba(255,255,255,.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
-.vela-guide__orbit { position: absolute; inset: 7px; border: 1px solid rgba(49,138,157,.3); border-radius: 50%; transform: rotateX(68deg); animation: companion-orbit 5s linear infinite; }
-.vela-guide__spark { position: absolute; z-index: 3; width: 5px; height: 5px; border-radius: 50%; background: #ff916f; box-shadow: 0 0 8px rgba(255,130,96,.5); animation: spark-hop 2.4s ease-in-out infinite; }
-.vela-guide__spark--one { top: 5px; right: 5px; }
-.vela-guide__spark--two { bottom: 7px; left: 2px; width: 4px; height: 4px; background: #37a68b; animation-delay: -1.1s; }
-.vela-guide__copy { position: relative; display: flex; flex-direction: column; max-width: 190px; padding: .62rem .78rem; border: 1px solid rgba(91,63,50,.16); border-radius: 1rem; background: rgba(250,247,241,.92); box-shadow: 0 12px 30px rgba(68,48,42,.11); }
-.vela-guide__copy::before, .vela-guide__copy::after { content: ''; position: absolute; left: -12px; bottom: 15px; border-radius: 50%; background: rgba(250,247,241,.96); border: 1px solid rgba(91,63,50,.14); }
-.vela-guide__copy::before { width: 8px; height: 8px; }
-.vela-guide__copy::after { left: -22px; bottom: 8px; width: 5px; height: 5px; }
+.vela-guide .vela-oracle { width: 48px; height: 48px; flex: 0 0 auto; }
+.vela-guide__copy { display: flex; flex-direction: column; max-width: 205px; }
 .vela-guide__copy span { color: #8a493f; font-size: .6rem; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
 .vela-guide__copy strong { margin-top: .12rem; color: #3c485e; font-size: .73rem; font-weight: 650; white-space: nowrap; }
+
+.vela-oracle { display: grid; place-items: center; width: 72px; height: 72px; color: #71313c; filter: drop-shadow(0 8px 14px rgba(83,55,44,.16)); }
+.vela-oracle svg { width: 100%; height: 100%; overflow: visible; }
+.vela-oracle__halo { fill: rgba(248,243,233,.9); stroke: #b28a4f; stroke-width: 2; }
+.vela-oracle__beads { fill: none; stroke: rgba(31,78,85,.42); stroke-width: 1.2; stroke-dasharray: 2 5; transform-origin: 48px 48px; animation: oracle-turn 14s linear infinite; }
+.vela-oracle__arch, .vela-oracle__laurel, .vela-oracle__base { fill: none; stroke: #9b7641; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.vela-oracle__laurel { stroke-width: 1.6; opacity: .72; }
+.vela-oracle__v { fill: #234f58; transform-origin: 48px 48px; }
+.vela-oracle__signal { fill: #8d3441; filter: drop-shadow(0 0 5px rgba(141,52,65,.55)); animation: oracle-pulse 2.8s ease-in-out infinite; }
+.vela-oracle.is-active .vela-oracle__beads { animation-duration: 2.4s; }
+.vela-oracle.is-active .vela-oracle__signal { animation-duration: 1s; }
+.vela-oracle.is-complete .vela-oracle__halo { stroke: #367866; }
+.vela-oracle.is-complete .vela-oracle__signal { fill: #367866; }
 
 /* Compatibility layer for legacy dark-theme utility classes. */
 .animated-bg .text-white { color: #263247; }
@@ -530,6 +518,8 @@ input[type='number']::placeholder { color: #8a95a7; }
 @keyframes spark-hop { 0%,100% { transform: translate3d(0,0,0) scale(.8); opacity: .45; } 50% { transform: translate3d(3px,-7px,12px) scale(1.25); opacity: 1; } }
 @keyframes verify-circle { to { stroke-dashoffset: 0; } }
 @keyframes verify-tick { 70% { stroke-dashoffset: 0; transform: scale(1.08); transform-origin: center; } 100% { stroke-dashoffset: 0; transform: scale(1); transform-origin: center; } }
+@keyframes oracle-turn { to { transform: rotate(360deg); } }
+@keyframes oracle-pulse { 0%,100% { opacity: .65; transform: scale(.85); transform-origin: 48px 28px; } 50% { opacity: 1; transform: scale(1.18); transform-origin: 48px 28px; } }
 @keyframes orb-float-one { from { transform: translate3d(0,0,0) rotate(0deg); } to { transform: translate3d(-4vw,5vh,0) rotate(10deg); } }
 @keyframes orb-float-two { from { transform: translate3d(0,0,0) rotate(0deg); } to { transform: translate3d(5vw,-4vh,0) rotate(-9deg); } }
 @keyframes orb-float-three { from { transform: translate3d(-2vw,0,0) scale(.9); } to { transform: translate3d(3vw,4vh,0) scale(1.08); } }
@@ -548,13 +538,11 @@ input[type='number']::placeholder { color: #8a95a7; }
   .ambient-orb--lavender { width: 280px; right: -145px; }
   .ambient-orb--sage { width: 250px; left: -145px; }
   .metric-chip { padding-inline: .35rem; }
-  .vela-guide { right: .75rem; bottom: .75rem; padding: .45rem; border-radius: 1rem; }
-  .vela-guide__copy { display: none; }
-  .vela-guide__mascot { width: 62px; height: 82px; }
-  .vela-guide__scene { width: 62px; height: 82px; }
+  .vela-guide { align-self: stretch; margin: -1rem 0 -.8rem; border-radius: 1rem; }
+  .vela-guide__copy { max-width: none; }
   .login-identity-flow { grid-template-columns: 74px 1fr 68px; min-height: 96px; }
   .protocol-core--hero { width: 72px; height: 72px; }
-  .login-mascot { width: 68px; height: 68px; }
+  .login-oracle { width: 68px; height: 68px; }
   .login-identity-flow__labels { display: none; }
 }
 
@@ -564,8 +552,7 @@ input[type='number']::placeholder { color: #8a95a7; }
 }
 
 @media (max-width: 1200px) {
-  .vela-guide { right: .85rem; bottom: .85rem; padding: .48rem; border-radius: 1rem; }
-  .vela-guide__copy { display: none; }
+  .vela-guide { margin-right: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
