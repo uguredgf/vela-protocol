@@ -57,11 +57,9 @@ Wasm Size: 10580 bytes
 ```
 `npx tsc --noEmit` exited 0. `npm run build` completed in 4.79s with the existing bundle-size warning.
 
-## Previous Deployment
+## Identity Hash Duplicate Guard Deployment
 
-## Sybil Resistance Deployment
-
-The identity-bound contract was deployed and funded on testnet:
+The identity-hash duplicate-guard contract was deployed and funded on testnet:
 
 - Contract: `CCSDVXSUOS2P7PJZASQ7XZ27BYOMRWUNJPBMBK3AMF6PFWXT5VPU7ZMB`
 - Deploy transaction: `f924cb43d67a19aeec69a8d76e35c366bea5c71416cac0b11dbf51a25544b0c5`
@@ -70,6 +68,6 @@ The identity-bound contract was deployed and funded on testnet:
 - Second call with the same identity hash failed during simulation with `Error(Contract, #12)` (`IdentityAlreadyUsed`), using a different commitment to prove the identity check is independent of commitment replay.
 - Live subsidy balance after funding: `20000000000` stroops (`2000 XLM`)
 
-`CDO3YYFGPRKOVH3XRQQ2ZD2W233G7NZSKLOWT2OGSKOUF5ZWMNMAI7GV` was initialized (`042ec8d13070cdb6d56238b25d39ebe4e385b5950ce298d4352bc24b4a1adf77`) and funded with 2,000 testnet XLM (`bfa215e18f761a9778f859d02880ba93f01908b8dea186d188b4a55a7e51db09`). Its Blend nested transfer authorization was missing. Those test funds remain locked because that deployed version has no withdrawal or upgrade entry point. The user explicitly approved deploying the corrected version and funding an additional 2,000 testnet XLM. Do not point the frontend back to the old contract.
+`CDO3YYFGPRKOVH3XRQQ2ZD2W233G7NZSKLOWT2OGSKOUF5ZWMNMAI7GV` was initialized (`042ec8d13070cdb6d56238b25d39ebe4e385b5950ce298d4352bc24b4a1adf77`) and funded with 2,000 testnet XLM (`bfa215e18f761a9778f859d02880ba93f01908b8dea186d188b4a55a7e51db09`). Its Blend nested transfer authorization was missing. Those test funds remain locked because that deployed version has no withdrawal or upgrade entry point. It is superseded by the current frontend contract listed at the top of this document.
 
 The corrected contract also has no withdrawal entry point; this workflow verifies supplying collateral only. Blend records the collateral under the gatekeeper address. The frontend borrow limit remains an estimate, not a completed loan.

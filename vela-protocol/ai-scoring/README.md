@@ -25,7 +25,7 @@ uvicorn server:app --reload
 - `GET /health` : Check service health.
 - `GET /model-info` : Model metadata and Responsible AI constraints.
 - `GET /score/{account_id}` : Live scoring by fetching on-chain data from Stellar Horizon testnet.
-- `POST /score` : Submit custom transaction arrays for instantaneous scoring.
+- `POST /score` : Score an account ID using canonical Horizon history. A legacy `transactions` field is accepted for client compatibility but ignored by the service.
 
 ## Deployment
 

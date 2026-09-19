@@ -1,42 +1,19 @@
-# ZK Circuit — Commitment + Range Proof
+# Commitment and Threshold Claim Prototype
 
-## Overview
+## Current MVP
 
-This module implements the zero-knowledge proof layer for Vela Protocol.
+Vela does not currently implement a zero-knowledge proof or an on-chain ZK verifier.
 
-**What we prove:** "The committed score is ≥ threshold" — without revealing the actual score.
+The browser creates:
 
-**What we DON'T do:** zkML (proving the AI model's computation itself is ZK) — this is research-level and not feasible in 36 hours.
+- a SHA-256 commitment over the score and a random 32-byte salt;
+- a client-computed threshold flag (`0` or `1`);
+- a 36-byte public input containing the 32-byte commitment followed by that flag.
 
-## Architecture
+The proof byte array is empty. The Soroban contract validates the public-input length and flag encoding, then uses the submitted bytes for replay protection. It does not verify the raw score, recompute the commitment, or cryptographically bind the threshold flag to the committed score.
 
-```
-Client-Side (Browser)                    On-Chain (Soroban)
-┌─────────────────────┐                  ┌─────────────────────┐
-│ 1. Receive score    │                  │ 4. Verify proof     │
-│ 2. Create commitment│ ───proof+pi───▶  │ 5. Extract threshold│
-│ 3. Generate proof   │                  │ 6. Calculate subsidy│
-└─────────────────────┘                  └─────────────────────┘
-```
+This is a transparent hackathon boundary, not a simulated ZK proof.
 
-## MVP Implementation
+## Future Upgrade
 
-For the hackathon MVP, the ZK proof is simulated client-side:
-- **Commitment**: SHA-256 hash of (score || nonce)
-- **Public inputs**: threshold value + commitment hash
-- **Proof**: Structured bytes (mock — real implementation would use Groth16)
-
-The Soroban contract's mock verifier validates structure and extracts the score.
-
-## Future: Real BLS12-381 Groth16
-
-Soroban (Protocol 22+) supports native BLS12-381 primitives:
-```rust
-env.crypto().bls12_381().pairing_check(...)
-```
-
-A production implementation would:
-1. Define a Circom/Noir circuit for range proof
-2. Generate proving key + verification key
-3. Client generates Groth16 proof
-4. Soroban verifies via BLS12-381 pairing check
+A production version would define a range-proof circuit, generate a real proof in the client, and verify it on Soroban using an audited verifier. Groth16 or another suitable construction would require a proving and verification setup that is outside this MVP.

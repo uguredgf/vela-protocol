@@ -58,7 +58,7 @@ Vela Protocol is a hackathon integration prototype that derives a demonstrative 
 2. **Data Collection** — Transaction history fetched from Stellar Horizon API
 3. **AI Scoring** — After a minimum evidence gate, an explainable synthetic-data ML model produces a demonstrative 0-100 signal
 4. **Score commitment** — Client-side SHA-256 commitment plus a 0/1 threshold claim; this MVP does not implement a Groth16 verifier
-5. **Identity binding** — SEP-10 authenticates the classic G-address; SEP-12 returns a `customer_id` that is SHA-256 hashed in the browser
+5. **Identity-hash preparation** — SEP-10 authenticates the classic G-address; SEP-12 returns a `customer_id` that is SHA-256 hashed in the browser
 6. **On-Chain Gatekeeper** — Soroban rejects a repeated submitted identity hash and executes the configured Blend supply path; it does not verify the hash's Anchor origin
 7. **Blend Position** — The deployed contract supplies user collateral plus subsidy to Blend; the displayed borrow figure is an estimate, not a completed borrow call
 8. **Anchor Transfer** — SEP-6 withdraw returns an anchor address/memo; the classic G-address sends real testnet USDC and the UI polls the returned anchor transaction
@@ -173,7 +173,7 @@ The public `/evidence` route checks the deployed model service and demonstrates 
 
 - **No raw data on-chain**: Only a commitment/threshold payload and position state are submitted
 - **User transparency**: Users see exactly which data influenced their score
-- **No proxy discrimination**: Model explicitly excludes demographic, location, and identity features
+- **Feature boundary**: The model excludes direct demographic, location, identity, KYC-status, and device features; this MVP does not claim a complete proxy-bias audit
 - **Commitment replay guard**: Submitted commitment payloads cannot be reused
 - **Identity-hash duplicate guard**: Repeated submitted hashes are rejected; the contract does not yet verify an Anchor signature, so this is not complete Sybil resistance
 - **Explainable AI**: SHAP values show per-feature contribution to every score
