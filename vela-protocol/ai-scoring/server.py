@@ -78,17 +78,16 @@ def require_sufficient_history(transactions: list) -> None:
 async def score_account(req: ScoreRequest):
     if not is_classic_address(req.account_id):
         raise HTTPException(status_code=422, detail="Scoring requires a valid classic G-address")
-    txs = req.transactions
-    
-    if not txs:
-        # Fetch from horizon if no txs provided
-        try:
-            txs_raw = await fetch_transactions(req.account_id)
-        except ValueError as e:
-            raise HTTPException(status_code=422, detail=str(e))
-        except httpx.HTTPError as e:
-            raise HTTPException(status_code=502, detail=f"Horizon request failed: {e}")
-        txs = [TransactionItem(**t) for t in txs_raw]
+    # Never trust caller-supplied history for an eligibility signal. The field is
+    # accepted for backwards-compatible clients but the deployed service always
+    # reads the canonical account payments from Horizon.
+    try:
+        txs_raw = await fetch_transactions(req.account_id)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"Horizon request failed: {e}")
+    txs = [TransactionItem(**t) for t in txs_raw]
 
     require_sufficient_history(txs)
     
