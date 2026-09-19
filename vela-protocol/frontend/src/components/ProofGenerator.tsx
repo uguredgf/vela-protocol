@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { generateCommitment, generateRangeProof } from '../services/proof';
-import { Lock, Cpu } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { MultiStepLoader } from './ui/MultiStepLoader';
+import { StatefulAction } from './ui/StatefulAction';
 
 export const ProofGenerator: React.FC = () => {
   const { score, guidedDemo, setProof } = useStore();
@@ -30,40 +31,31 @@ export const ProofGenerator: React.FC = () => {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto space-y-6">
-      <div className="glass-panel p-8 text-center space-y-6">
+      <div className="glass-panel task-panel p-6 md:p-8 text-center space-y-6">
         {guidedDemo && <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-sm text-amber-800">Guided sample: this local claim uses a fictional profile and will not be submitted as your position.</div>}
-        <div className="w-20 h-20 bg-accent/20 rounded-full mx-auto flex items-center justify-center">
+        <div className="commitment-mark mx-auto">
           <Lock className="text-accent" size={40} />
         </div>
         
-        <h2 className="text-2xl font-bold">Private Threshold Claim</h2>
+        <h2 className="display-serif text-3xl font-semibold">Private Threshold Claim</h2>
         <p className="text-gray-400">
           A 32-byte SHA-256 commitment and a 4-byte threshold result are prepared locally. The contract checks the payload format; this MVP does not yet cryptographically prove that the committed score meets the threshold.
         </p>
 
         {status === 'idle' && (
-          <button 
+          <StatefulAction
             onClick={handleGenerate}
-            className="w-full bg-accent hover:bg-accent/80 py-4 rounded-xl font-semibold transition-colors mt-4"
+            icon={<Lock size={18} />}
+            className="w-full bg-accent text-white py-4 rounded-xl font-semibold mt-4"
           >
             Prepare Commitment
-          </button>
+          </StatefulAction>
         )}
 
         {status === 'generating' && (
-          <div className="py-8 space-y-4">
-            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}>
-              <Cpu size={48} className="mx-auto text-accent" />
-            </motion.div>
+          <div className="commitment-stage py-8 space-y-5">
+            <div className="commitment-mark is-working mx-auto"><Lock className="text-accent" size={38} /></div>
             <MultiStepLoader active steps={['Hashing score + salt', 'Building 36-byte claim', 'Ready for Soroban']} />
-            <div className="w-full bg-surface h-2 rounded-full overflow-hidden">
-              <motion.div 
-                className="h-full bg-accent"
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 2.5 }}
-              />
-            </div>
           </div>
         )}
 
@@ -80,12 +72,14 @@ export const ProofGenerator: React.FC = () => {
               <p><span className="text-gray-500">Public inputs:</span> 36 bytes</p>
             </div>
 
-            <button 
+            <StatefulAction
               onClick={() => navigate('/position')}
-              className="w-full bg-success hover:bg-success/80 py-4 rounded-xl font-semibold transition-colors text-white"
+              state="success"
+              successLabel="Continue to Position"
+              className="w-full py-4 rounded-xl font-semibold text-white"
             >
               Continue to Position
-            </button>
+            </StatefulAction>
           </motion.div>
         )}
         {error && <p role="alert" className="text-red-400">{error}</p>}

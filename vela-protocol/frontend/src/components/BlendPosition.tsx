@@ -11,6 +11,7 @@ import { sep10Auth, sep12KYC } from '../services/anchor';
 import { hashIdentity } from '../services/proof';
 import { Keypair, Networks, Transaction } from '@stellar/stellar-sdk';
 import { signWithFreighter } from '../services/freighter';
+import { StatefulAction } from './ui/StatefulAction';
 
 const formatAmount = (value: number) => new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 2, maximumFractionDigits: 2,
@@ -61,7 +62,7 @@ export const BlendPosition: React.FC = () => {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto space-y-6">
-      <div className="glass-panel p-8">
+      <div className="glass-panel task-panel p-6 md:p-8">
         <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
           <TrendingUp className="text-accent" /> Supply Subsidized Collateral
         </h2>
@@ -74,26 +75,14 @@ export const BlendPosition: React.FC = () => {
               onChange={e => setAmount(e.target.value)}
               className="w-full bg-surface border border-white/10 rounded-lg p-3 outline-none focus:border-accent" />
 
-            <div className="bg-surface p-6 rounded-lg border border-white/5 space-y-4">
-              <p className="text-sm text-gray-500">You supply {formatAmount(estimate.userCollateral)} XLM; Vela adds {formatAmount(estimate.subsidyAmount)} XLM; {formatAmount(estimate.totalPosition)} XLM would reach Blend.</p>
-              <div className="flex justify-between gap-4">
-                <span className="text-gray-400">Scenario collateral</span>
-                <span className="font-bold">{formatAmount(estimate.userCollateral)} XLM</span>
-              </div>
-              <div className="flex justify-between gap-4 text-accent">
-                <span>Vela subsidy ({tier.percentage}%)</span>
-                <span className="font-bold">+{formatAmount(estimate.subsidyAmount)} XLM</span>
-              </div>
-              <div className="h-px bg-white/10" />
-              <div className="flex justify-between gap-4">
-                <span className="text-gray-400">Total collateral</span>
-                <span className="font-bold">{formatAmount(estimate.totalPosition)} XLM</span>
-              </div>
-              <div className="flex justify-between gap-4 text-success">
-                <span>Illustrative borrow capacity</span>
-                <span className="font-bold">{formatAmount(estimate.borrowAmount)} XLM</span>
-              </div>
+            <div className="position-equation" aria-label="Collateral composition">
+              <div><span>You supply</span><strong>{formatAmount(estimate.userCollateral)} XLM</strong></div>
+              <b>+</b>
+              <div><span>Vela subsidy · {tier.percentage}%</span><strong className="text-accent">{formatAmount(estimate.subsidyAmount)} XLM</strong></div>
+              <b>=</b>
+              <div className="is-total"><span>Blend collateral</span><strong>{formatAmount(estimate.totalPosition)} XLM</strong></div>
             </div>
+            <div className="supporting-row"><span>Illustrative capacity · no borrow</span><strong>{formatAmount(estimate.borrowAmount)} XLM</strong></div>
 
             {guidedDemo ? (
               <div className="space-y-3">
@@ -103,11 +92,13 @@ export const BlendPosition: React.FC = () => {
               </div>
             ) : (
               <>
-                <button onClick={handleOpenPosition}
+                <StatefulAction onClick={handleOpenPosition}
                   disabled={loading || !classicAccount || !publicInputs || score === null || score < 60 || !validAmount}
-                  className="w-full bg-accent hover:bg-accent/80 py-4 rounded-lg font-semibold disabled:opacity-50">
-                  {loading ? 'Submitting to testnet...' : 'Supply Collateral on Testnet'}
-                </button>
+                  state={loading ? 'working' : 'idle'}
+                  workingLabel="Submitting to Stellar testnet…"
+                  className="w-full bg-accent text-white py-4 rounded-xl font-semibold">
+                  Supply Collateral on Testnet
+                </StatefulAction>
                 <MultiStepLoader active={loading} steps={['Preparing Soroban transaction', 'Signing with classic G-address', 'Waiting for testnet confirmation']} />
                 {!classicAccount && <p className="text-sm text-yellow-400">A classic G-address is required for this position.</p>}
                 {classicAccount && !publicInputs && <button onClick={() => navigate('/proof')} className="text-accent underline">Prepare commitment</button>}

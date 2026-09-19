@@ -17,7 +17,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         <div className="flex items-center gap-3">
           <ProtocolCore />
           <div>
-            <span className="block text-lg font-bold tracking-tight gradient-text">Vela Protocol</span>
+            <span className="block text-lg font-bold tracking-tight text-ink">Vela Protocol</span>
             <span className="hidden sm:block text-[10px] uppercase tracking-[0.2em] text-gray-500">Private risk signal · Stellar testnet</span>
           </div>
         </div>
@@ -29,7 +29,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         )}
       </header>
       
-      <main className="flex-1 flex flex-col px-4 py-6 md:px-8 md:py-8 max-w-5xl mx-auto w-full gap-8">
+      <main className="flex-1 flex flex-col px-4 py-5 md:px-8 md:py-6 max-w-5xl mx-auto w-full gap-6">
         {location.pathname !== '/evidence' && <Stepper />}
         <VelaGuide />
         <div className="flex-1 route-shell">

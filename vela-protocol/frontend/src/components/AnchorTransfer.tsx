@@ -9,6 +9,7 @@ import { Keypair, Transaction, Networks } from '@stellar/stellar-sdk';
 import { signWithFreighter } from '../services/freighter';
 import { getExplorerUrl } from '../services/stellar';
 import { formatAnchorStatus } from '../utils/status';
+import { StatefulAction } from './ui/StatefulAction';
 
 type DepositStep = 'idle' | 'authenticating' | 'requesting' | 'awaiting_bank' | 'simulating' | 'polling' | 'completed' | 'error';
 type TransferMode = 'deposit' | 'withdraw';
@@ -264,13 +265,13 @@ export const AnchorTransfer: React.FC = () => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto space-y-6">
 
-      <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm text-amber-800">
+      <div className="context-note flex items-start gap-3 p-4 text-sm text-amber-800">
         <Info size={19} className="mt-0.5 shrink-0" />
         <div><strong>Standalone Anchor interoperability demo</strong><p className="mt-1 text-xs text-gray-600">This rail uses the Stellar account’s existing USDC or a sandbox TRY deposit. It is separate from Blend and does not represent loan proceeds.</p></div>
       </div>
 
       {/* Identity Separation Panel */}
-      <div className="glass-panel p-6">
+      <div className="support-panel p-5 md:p-6">
         <h3 className="text-lg font-semibold mb-4 text-white">Identity Separation</h3>
         <div className="space-y-3">
           <div className="flex items-center gap-4 bg-surface p-3 rounded-lg border border-white/5">
@@ -301,8 +302,8 @@ export const AnchorTransfer: React.FC = () => {
       )}
 
       {/* Deposit Flow */}
-      <div className="glass-panel overflow-hidden">
-        <div className="grid grid-cols-2 border-b border-white/10">
+      <div className="glass-panel task-panel overflow-hidden">
+        <div className="mode-switch grid grid-cols-2">
           <button type="button" onClick={() => changeMode('deposit')}
             disabled={!!resumableWithdrawal && step === 'polling'}
             className={`py-3 text-sm font-semibold ${mode === 'deposit' ? 'bg-accent/15 text-accent' : 'text-gray-400 hover:text-white'}`}>
@@ -380,23 +381,27 @@ export const AnchorTransfer: React.FC = () => {
 
           {/* Step 1: Initiate */}
           {mode === 'deposit' && (step === 'idle' || step === 'error') && (
-            <button
+            <StatefulAction
               onClick={handleDeposit}
               disabled={!amount || loading || !classicAccount || Number(amount) < 50 || Number(amount) > 300}
-              className="w-full bg-accent hover:bg-accent/80 py-4 rounded-xl font-semibold transition-colors disabled:opacity-50 flex justify-center items-center gap-2"
+              state={loading ? 'working' : 'idle'}
+              workingLabel="Opening Anchor deposit…"
+              icon={<ArrowRight size={18} />}
+              className="w-full bg-accent text-white py-4 rounded-xl font-semibold"
             >
-              {loading ? <RefreshCcw className="animate-spin" size={18} /> : <ArrowRight size={18} />}
               Initiate Deposit
-            </button>
+            </StatefulAction>
           )}
 
           {mode === 'withdraw' && !resumableWithdrawal && (step === 'idle' || step === 'error') && (
-            <button onClick={handleWithdraw}
+            <StatefulAction onClick={handleWithdraw}
               disabled={!amount || loading || !classicAccount || Number(amount) <= 0 || (!!usdcBalance && Number(amount) > Number(usdcBalance))}
-              className="w-full bg-accent hover:bg-accent/80 py-4 rounded-xl font-semibold transition-colors disabled:opacity-50 flex justify-center items-center gap-2">
-              {loading ? <RefreshCcw className="animate-spin" size={18} /> : <ArrowRight size={18} />}
+              state={loading ? 'working' : 'idle'}
+              workingLabel="Submitting USDC payment…"
+              icon={<ArrowRight size={18} />}
+              className="w-full bg-accent text-white py-4 rounded-xl font-semibold">
               Send USDC Withdrawal on Testnet
-            </button>
+            </StatefulAction>
           )}
 
           {/* Step progress */}

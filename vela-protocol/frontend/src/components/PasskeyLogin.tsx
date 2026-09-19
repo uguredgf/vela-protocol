@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import { assertPasskeyEnvironment, createWallet, connectWallet } from '../services/passkey';
 import { bindClassicAccount, createFundedClassicAccount, PENDING_DEPLOY_SOURCE_KEY, provisionClassicAccount, restorePendingClassicAccount } from '../services/classicAccount';
 import { connectFreighter } from '../services/freighter';
-import { Fingerprint, ShieldCheck, Wallet } from 'lucide-react';
+import { ArrowUpRight, Fingerprint, ShieldCheck, Wallet } from 'lucide-react';
 import { ProtocolCore } from './ui/ProtocolCore';
-import { VelaOracle } from './ui/VelaOracle';
+import { StatefulAction } from './ui/StatefulAction';
 
 export const PasskeyLogin: React.FC = () => {
   const { setAuth, setFreighterAuth, isAuthenticated, classicAccount } = useStore();
@@ -84,30 +84,31 @@ export const PasskeyLogin: React.FC = () => {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="aurora-stage flex flex-col items-center justify-center text-center max-w-5xl mx-auto py-4 md:py-6"
+      className="flex flex-col items-center justify-center max-w-5xl mx-auto py-1 md:py-3"
     >
       <div className="hero-layout w-full">
         <div className="hero-copy-glass">
           <div className={`login-identity-flow mb-5 ${isConnecting ? 'is-working' : isAuthenticated ? 'is-ready' : ''}`}>
             <div className="hero-mark"><ProtocolCore variant="hero" active={isConnecting} /></div>
-            <div className="login-identity-flow__line"><span /><span /><span /></div>
-            <div className="login-identity-flow__labels"><span>Passkey</span><span>Stellar account</span><span>Private signal</span></div>
-            <VelaOracle className="login-oracle" active={isConnecting} complete={isAuthenticated} />
+            <div className="login-identity-flow__route">
+              <div className="login-identity-flow__line"><span /><span /><span /></div>
+              <div className="login-identity-flow__labels"><span>Account</span><span>Signal</span><span>Blend</span></div>
+            </div>
           </div>
           <div className="eyebrow mb-4">
             <span className="eyebrow__dot" /> Verified on Stellar testnet
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-5 tracking-[-0.04em] leading-[1.02]">
-            Credit signals with<br className="hidden sm:block" /> <span className="gradient-text">privacy built in.</span>
+          <h1 className="display-serif text-4xl md:text-[3.35rem] font-semibold mb-5 tracking-[-0.035em] leading-[0.98]">
+            Credit context for<br className="hidden sm:block" /> <span className="text-accent">on-chain cash flow.</span>
           </h1>
           <p className="text-gray-400 mb-7 text-base md:text-lg max-w-2xl leading-relaxed">
             Read eligible Stellar payment history into a demonstrative risk signal, prepare a private commitment, and verify a real collateral-supply path through Blend v2.
           </p>
 
-          <div className="grid grid-cols-3 gap-2 md:gap-3 w-full">
-            <div className="metric-chip"><strong>AI</strong><span>Explainable score</span></div>
-            <div className="metric-chip"><strong>Local</strong><span>Score commitment</span></div>
-            <div className="metric-chip"><strong>Live</strong><span>Testnet transaction</span></div>
+          <div className="trust-list w-full" aria-label="Protocol safeguards">
+            <div><ShieldCheck size={16} /><span>Minimum evidence gate</span></div>
+            <div><ShieldCheck size={16} /><span>Score stays off-chain</span></div>
+            <div><ShieldCheck size={16} /><span>Verifiable testnet supply</span></div>
           </div>
         </div>
 
@@ -126,23 +127,27 @@ export const PasskeyLogin: React.FC = () => {
             Continue Current Session
           </button>
         )}
-        <button
+        <StatefulAction
           onClick={handleCreate}
           disabled={isConnecting}
-          className="primary-action bg-accent hover:bg-accent/80 text-white p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+          state={isConnecting ? 'working' : 'idle'}
+          workingLabel="Preparing secure entry…"
+          icon={<Fingerprint size={20} />}
+          className="primary-action bg-accent text-white p-4 rounded-xl font-semibold"
         >
-          <Fingerprint size={20} />
           Create Passkey
-        </button>
+        </StatefulAction>
         
-        <button
+        <StatefulAction
           onClick={handleConnect}
           disabled={isConnecting}
-          className="secondary-action bg-surface hover:bg-surface/80 border border-white/10 text-white p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+          state={isConnecting ? 'working' : 'idle'}
+          workingLabel="Connecting passkey…"
+          icon={<Fingerprint size={20} />}
+          className="secondary-action bg-surface border border-white/10 p-4 rounded-xl font-semibold"
         >
-          <Fingerprint size={20} />
           Connect Passkey
-        </button>
+        </StatefulAction>
 
         <div className="relative flex py-2 items-center">
           <div className="flex-grow border-t border-white/10"></div>
@@ -162,10 +167,11 @@ export const PasskeyLogin: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate('/evidence')}
-          className="border border-accent/40 bg-accent/10 hover:bg-accent/20 text-accent p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
+          className="evidence-link text-accent px-2 py-2 font-semibold flex items-center justify-center gap-2"
         >
           <ShieldCheck size={20} />
           View Live Testnet Evidence
+          <ArrowUpRight size={16} />
         </button>
         <p className="text-[11px] leading-relaxed text-gray-500 px-2">A signal requires at least 5 non-bootstrap payments spanning 7 days. New or Friendbot-only accounts return “insufficient history,” not a score.</p>
         </div>

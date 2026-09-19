@@ -19,8 +19,13 @@ export const Stepper: React.FC = () => {
   const completedSteps = [currentStep > 0, score !== null, proofGenerated, !!position, transferCompleted, false];
 
   return (
-    <div className="stepper-shell w-full mb-8 overflow-x-auto pb-4">
-      <div className="stepper-track flex items-start w-full min-w-[680px] px-2">
+    <nav className="stepper-shell w-full" aria-label="Vela journey">
+      <div className="journey-mobile md:hidden">
+        <span className="journey-mobile__count">Step {currentStep + 1} of {steps.length}</span>
+        <span className="journey-mobile__name">{steps[currentStep].label}</span>
+        <div className="journey-mobile__progress"><span style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }} /></div>
+      </div>
+      <div className="stepper-track hidden md:flex items-start w-full px-2">
         {steps.map((step, index) => {
           const isCompleted = index < currentStep && completedSteps[index];
           const isCurrent = index === currentStep;
@@ -38,7 +43,7 @@ export const Stepper: React.FC = () => {
               >
                 {isCompleted ? <Check size={17} strokeWidth={3} /> : <step.icon size={17} />}
               </div>
-              <span className={`text-[11px] uppercase tracking-[0.12em] mt-2 ${isCurrent ? 'text-accent font-semibold' : 'text-gray-400'}`}>
+              <span className={`text-[10px] uppercase tracking-[0.12em] mt-2 ${isCurrent ? 'text-accent font-semibold' : 'text-gray-400'}`}>
                 {step.label}
               </span>
               {index < steps.length - 1 && (
@@ -48,6 +53,6 @@ export const Stepper: React.FC = () => {
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 };

@@ -10,7 +10,7 @@ export const Card3D: React.FC<{ children: React.ReactNode; className?: string }>
         const rect = event.currentTarget.getBoundingClientRect();
         const x = (event.clientX - rect.left) / rect.width - 0.5;
         const y = (event.clientY - rect.top) / rect.height - 0.5;
-        setTransform(`perspective(1200px) rotateX(${(-y * 8).toFixed(2)}deg) rotateY(${(x * 10).toFixed(2)}deg)`);
+        setTransform(`perspective(1200px) rotateX(${(-y * 2.5).toFixed(2)}deg) rotateY(${(x * 3).toFixed(2)}deg)`);
       }}
       onPointerLeave={() => setTransform('perspective(1200px) rotateX(0deg) rotateY(0deg)')}
     >

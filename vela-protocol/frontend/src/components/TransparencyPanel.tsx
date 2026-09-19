@@ -121,13 +121,13 @@ export const TransparencyPanel: React.FC = () => {
         <div className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-4 py-2 text-sm text-accent">
           <ReceiptText size={18} /> End-of-session verification
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold">Your verification receipt</h1>
+        <h1 className="display-serif text-3xl md:text-4xl font-semibold">Your verification receipt</h1>
         <p className="text-gray-400 max-w-2xl mx-auto">
           A plain-language record of what happened in this session—and what each result actually proves. This is a prototype receipt, not a regulatory audit report.
         </p>
       </div>
 
-      <div className="glass-panel overflow-hidden">
+      <div className="glass-panel task-panel overflow-hidden">
         <div className="px-5 md:px-6 py-4 border-b border-white/10">
           <h2 className="font-bold">Session trail</h2>
           <p className="text-xs text-gray-500 mt-1">Statuses are labeled by their real source instead of being presented as one continuous loan.</p>
@@ -150,7 +150,7 @@ export const TransparencyPanel: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="glass-panel p-6 space-y-3">
+        <div className="support-panel p-6 space-y-3">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-bold flex items-center gap-2"><Landmark className="text-accent" size={20} /> Blend collateral supply</h2>
             <NetworkBadge state={positionState} />
@@ -165,7 +165,7 @@ export const TransparencyPanel: React.FC = () => {
           ) : <p className="text-sm text-gray-500">No Blend supply transaction was recorded in this session.</p>}
         </div>
 
-        <div className="glass-panel p-6 space-y-3">
+        <div className="support-panel p-6 space-y-3">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-bold flex items-center gap-2"><FlaskConical className="text-accent" size={20} /> Anchor rail</h2>
             {latestAnchor?.txHash ? <NetworkBadge state={anchorPaymentState} /> : <span className="receipt-badge receipt-badge--warning">TRY SANDBOX</span>}

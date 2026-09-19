@@ -64,14 +64,14 @@ export const EvidencePanel: React.FC = () => {
         <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-2 text-sm text-accent">
           <ShieldCheck size={18} /> Independent judge view
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold">Evidence, with boundaries</h1>
+        <h1 className="display-serif text-3xl md:text-4xl font-semibold">Evidence, with boundaries</h1>
         <p className="text-gray-400 max-w-2xl mx-auto">
           This wallet-free page separates what can be independently verified from what remains a hackathon prototype. It is not a simulated completion screen.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="glass-panel p-5">
+      <div className="evidence-bento grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="support-panel p-5 md:col-span-1">
           <div className="flex items-center gap-2 text-sm text-gray-400"><Activity size={18} /> AI service</div>
           <div className="mt-3 flex items-center gap-2 font-semibold">
             {verification.service === 'checking' && <><Loader2 className="animate-spin text-accent" size={18} /> Checking live endpoint</>}
@@ -83,7 +83,7 @@ export const EvidencePanel: React.FC = () => {
           </a>
         </div>
 
-        <div className="glass-panel p-5">
+        <div className="support-panel p-5 md:col-span-1">
           <div className="text-sm text-gray-400">Minimum-history gate</div>
           <div className="mt-3 text-2xl font-bold">
             {verification.scoreState === 'checking' ? 'Checking…'
@@ -101,14 +101,14 @@ export const EvidencePanel: React.FC = () => {
           <p className="text-[11px] text-gray-600 mt-2">Sparse or Friendbot-only accounts must not receive a score.</p>
         </div>
 
-        <div className="glass-panel p-5">
+        <div className="support-panel p-5 md:col-span-1">
           <div className="text-sm text-gray-400">Gatekeeper contract</div>
           <div className="mt-3 flex items-center gap-2 font-semibold"><CheckCircle2 className="text-success" size={18} /> Deployed on testnet</div>
           <p className="text-xs text-gray-500 mt-2">It rejects a repeated submitted hash. The hash's Anchor origin is not attested on-chain yet.</p>
         </div>
       </div>
 
-      <div className="glass-panel p-6 space-y-4">
+      <div className="glass-panel task-panel p-6 space-y-4">
         <h2 className="text-xl font-bold">Independent transaction evidence</h2>
         <a href={GATEKEEPER_TX} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-4 rounded-lg bg-surface p-4 hover:bg-white/5">
           <span><strong>Gatekeeper deployment</strong><span className="block text-xs text-gray-500 mt-1">Deployed Soroban contract; deployment alone does not prove eligibility</span></span>
