@@ -6,6 +6,7 @@ import { assertPasskeyEnvironment, createWallet, connectWallet } from '../servic
 import { bindClassicAccount, createFundedClassicAccount, PENDING_DEPLOY_SOURCE_KEY, provisionClassicAccount, restorePendingClassicAccount } from '../services/classicAccount';
 import { connectFreighter } from '../services/freighter';
 import { Fingerprint, ShieldCheck, Wallet } from 'lucide-react';
+import { ProtocolCore } from './ui/ProtocolCore';
 
 export const PasskeyLogin: React.FC = () => {
   const { setAuth, setFreighterAuth, isAuthenticated, classicAccount } = useStore();
@@ -86,9 +87,11 @@ export const PasskeyLogin: React.FC = () => {
     >
       <div className="hero-layout w-full">
         <div className="hero-copy-glass">
-          <div className="hero-mark mb-6" aria-hidden="true">
-            <div className="hero-mark__orbit" />
-            <div className="hero-mark__core">V</div>
+          <div className={`login-identity-flow mb-5 ${isConnecting ? 'is-working' : isAuthenticated ? 'is-ready' : ''}`}>
+            <div className="hero-mark"><ProtocolCore variant="hero" active={isConnecting} /></div>
+            <div className="login-identity-flow__line"><span /><span /><span /></div>
+            <div className="login-identity-flow__labels"><span>Passkey</span><span>Stellar account</span><span>Private signal</span></div>
+            <motion.img className="login-mascot" src="/vela-mascot.png" alt="Vela protocol guide" animate={isConnecting ? { x: [0, 12, 0], y: [0, -7, 0], rotateY: [0, 14, 0] } : { y: [0, -5, 0], rotateZ: [-1.5, 1.5, -1.5] }} transition={{ duration: isConnecting ? 1.4 : 3.4, repeat: Infinity, ease: 'easeInOut' }} />
           </div>
           <div className="eyebrow mb-4">
             <span className="eyebrow__dot" /> Verified on Stellar testnet

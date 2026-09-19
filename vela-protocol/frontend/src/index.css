@@ -211,10 +211,18 @@
   filter: drop-shadow(0 8px 12px rgba(80,72,132,.2));
 }
 .protocol-core svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.protocol-core__signal { fill: none; stroke: rgba(55,126,151,.42); stroke-width: 1; stroke-dasharray: 8 6; transform-origin: 24px 24px; animation: signal-orbit 8s linear infinite; }
 .protocol-core__shell { stroke: rgba(255,255,255,.72); stroke-width: 1; }
 .protocol-core__sail { fill: rgba(250,252,255,.96); filter: drop-shadow(0 2px 2px rgba(40,43,86,.18)); }
 .protocol-core__wake { fill: none; stroke: #9AF0D4; stroke-width: 1.6; stroke-linecap: round; }
 .protocol-core__star { fill: #B8F6E2; animation: soft-pulse 2.6s ease-in-out infinite; }
+.protocol-core__node { fill: #ff9b78; transform-origin: 24px 24px; animation: signal-orbit 8s linear infinite; filter: drop-shadow(0 0 4px rgba(255,125,91,.7)); }
+.protocol-core--hero { width: 92px; height: 92px; filter: drop-shadow(0 20px 24px rgba(38,75,104,.2)); }
+.protocol-core--hero .protocol-core__shell { transform-origin: 24px 24px; animation: mark-breathe 5s ease-in-out infinite; }
+.protocol-core--hero.is-active .protocol-core__signal, .protocol-core--hero.is-active .protocol-core__node { animation-duration: 1.25s; }
+.protocol-core--score .protocol-core__signal { stroke: rgba(48,134,151,.56); }
+.protocol-core--proof .protocol-core__signal { stroke-dasharray: 3 3; stroke: rgba(89,96,170,.55); }
+.protocol-core--position .protocol-core__signal, .protocol-core--anchor .protocol-core__signal { stroke: rgba(39,139,111,.58); }
 
 .score-loader { min-height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .score-loader__stage { position: relative; display: grid; place-items: center; width: 170px; height: 170px; margin-bottom: 1rem; }
@@ -277,48 +285,17 @@
   animation: orb-float-three 12s ease-in-out infinite alternate;
 }
 
-.hero-mark {
-  position: relative;
-  width: 92px;
-  height: 92px;
-  perspective: 600px;
-}
-
-.hero-mark__core {
-  position: absolute;
-  inset: 14px;
-  display: grid;
-  place-items: center;
-  border-radius: 25px;
-  color: #f8f8fb;
-  font-size: 2rem;
-  font-weight: 800;
-  background: linear-gradient(145deg, #8d85bd, #625b95 60%, #436f70);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 22px 45px rgba(76,68,126,.24);
-  transform: rotateX(10deg) rotateY(-12deg) rotateZ(2deg);
-  animation: hero-core-float 6s ease-in-out infinite;
-}
-
-.hero-mark__orbit {
-  position: absolute;
-  inset: 3px;
-  border: 1px solid rgba(89, 82, 142, .38);
-  border-radius: 50%;
-  transform: rotateX(68deg) rotateZ(18deg);
-  animation: hero-orbit 9s linear infinite;
-}
-
-.hero-mark__orbit::after {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #4b927f;
-  box-shadow: 0 0 0 5px rgba(75,146,127,.12), 0 3px 12px rgba(52,102,90,.25);
-}
+.login-identity-flow { position: relative; width: min(100%, 390px); min-height: 118px; display: grid; grid-template-columns: 96px 1fr 92px; align-items: center; gap: .55rem; perspective: 700px; }
+.hero-mark { display: grid; place-items: center; }
+.login-mascot { width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 15px 20px rgba(40,69,112,.2)); transform-style: preserve-3d; }
+.login-identity-flow__line { position: relative; height: 2px; background: linear-gradient(90deg, #4f7fb0, #2f9b83, #ff8f70); box-shadow: 0 0 15px rgba(47,155,131,.2); }
+.login-identity-flow__line span { position: absolute; top: 50%; width: 9px; height: 9px; border: 2px solid rgba(255,255,255,.9); border-radius: 50%; background: #3985a6; transform: translate(-50%,-50%); box-shadow: 0 0 0 4px rgba(57,133,166,.1); }
+.login-identity-flow__line span:nth-child(1) { left: 5%; }
+.login-identity-flow__line span:nth-child(2) { left: 50%; background: #2f9b83; }
+.login-identity-flow__line span:nth-child(3) { left: 95%; background: #ff8f70; }
+.login-identity-flow.is-working .login-identity-flow__line::after { content: ''; position: absolute; top: -2px; left: 0; width: 28%; height: 6px; border-radius: 9px; background: rgba(255,255,255,.92); filter: blur(1px); animation: flow-scan 1.4s ease-in-out infinite; }
+.login-identity-flow.is-ready .login-identity-flow__line span { background: #2f9b83; box-shadow: 0 0 0 5px rgba(47,155,131,.12); }
+.login-identity-flow__labels { position: absolute; left: 92px; right: 79px; bottom: 2px; display: flex; justify-content: space-between; gap: .4rem; color: #647288; font-size: .58rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
 
 .eyebrow {
   display: inline-flex;
@@ -452,16 +429,30 @@
   backdrop-filter: blur(20px) saturate(135%);
   -webkit-backdrop-filter: blur(20px) saturate(135%);
   pointer-events: none;
+  transition: right .7s cubic-bezier(.2,.8,.2,1), left .7s cubic-bezier(.2,.8,.2,1), bottom .7s cubic-bezier(.2,.8,.2,1), border-color .3s ease;
 }
+.vela-guide--score { right: 1.25rem; bottom: 1.25rem; }
+.vela-guide--proof { right: auto; left: 1.25rem; bottom: 18%; }
+.vela-guide--position { right: 1.25rem; bottom: 28%; }
+.vela-guide--anchor { right: auto; left: 1.25rem; bottom: 1.25rem; }
+.vela-guide--transparency, .vela-guide--evidence { right: 1.25rem; bottom: 1.25rem; }
+.vela-guide.is-complete { border-color: rgba(38,139,106,.32); background: rgba(235,248,243,.77); }
+.vela-guide__scene { position: relative; display: grid; place-items: center; width: 58px; height: 58px; perspective: 500px; }
 
 .vela-guide__mascot {
-  width: 54px;
-  height: 54px;
+  position: relative;
+  z-index: 2;
+  width: 58px;
+  height: 58px;
   flex: 0 0 auto;
   object-fit: contain;
   filter: drop-shadow(0 9px 14px rgba(74,66,121,.24));
   animation: guide-float 4.5s ease-in-out infinite;
 }
+.vela-guide__orbit { position: absolute; inset: 7px; border: 1px solid rgba(49,138,157,.3); border-radius: 50%; transform: rotateX(68deg); animation: companion-orbit 5s linear infinite; }
+.vela-guide__spark { position: absolute; z-index: 3; width: 5px; height: 5px; border-radius: 50%; background: #ff916f; box-shadow: 0 0 8px rgba(255,130,96,.5); animation: spark-hop 2.4s ease-in-out infinite; }
+.vela-guide__spark--one { top: 5px; right: 5px; }
+.vela-guide__spark--two { bottom: 7px; left: 2px; width: 4px; height: 4px; background: #37a68b; animation-delay: -1.1s; }
 .vela-guide__copy { display: flex; flex-direction: column; max-width: 180px; }
 .vela-guide__copy span { color: #71699f; font-size: .6rem; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
 .vela-guide__copy strong { margin-top: .12rem; color: #3c485e; font-size: .73rem; font-weight: 650; white-space: nowrap; }
@@ -508,6 +499,11 @@ input[type='number']::placeholder { color: #8a95a7; }
 @keyframes route-reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes guide-float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-3px) rotate(1deg); } }
 @keyframes scan-breathe { 0% { transform: scale(.78); opacity: 0; } 40% { opacity: .8; } 100% { transform: scale(1.12); opacity: 0; } }
+@keyframes signal-orbit { to { transform: rotate(360deg); } }
+@keyframes mark-breathe { 0%,100% { transform: scale(.94) rotate(-2deg); } 50% { transform: scale(1.03) rotate(2deg); } }
+@keyframes flow-scan { 0% { transform: translateX(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateX(260%); opacity: 0; } }
+@keyframes companion-orbit { to { transform: rotateX(68deg) rotateZ(360deg); } }
+@keyframes spark-hop { 0%,100% { transform: translate3d(0,0,0) scale(.8); opacity: .45; } 50% { transform: translate3d(3px,-7px,12px) scale(1.25); opacity: 1; } }
 @keyframes orb-float-one { from { transform: translate3d(0,0,0) rotate(0deg); } to { transform: translate3d(-4vw,5vh,0) rotate(10deg); } }
 @keyframes orb-float-two { from { transform: translate3d(0,0,0) rotate(0deg); } to { transform: translate3d(5vw,-4vh,0) rotate(-9deg); } }
 @keyframes orb-float-three { from { transform: translate3d(-2vw,0,0) scale(.9); } to { transform: translate3d(3vw,4vh,0) scale(1.08); } }
@@ -529,6 +525,11 @@ input[type='number']::placeholder { color: #8a95a7; }
   .vela-guide { right: .75rem; bottom: .75rem; padding: .45rem; border-radius: 1rem; }
   .vela-guide__copy { display: none; }
   .vela-guide__mascot { width: 43px; height: 43px; }
+  .vela-guide__scene { width: 44px; height: 44px; }
+  .login-identity-flow { grid-template-columns: 74px 1fr 68px; min-height: 96px; }
+  .protocol-core--hero { width: 72px; height: 72px; }
+  .login-mascot { width: 68px; height: 68px; }
+  .login-identity-flow__labels { display: none; }
 }
 
 @media (max-width: 860px) {
