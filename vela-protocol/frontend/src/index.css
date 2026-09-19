@@ -209,18 +209,13 @@
   filter: drop-shadow(0 8px 12px rgba(80,72,132,.2));
 }
 .protocol-core svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.protocol-core__signal { fill: none; stroke: rgba(55,126,151,.42); stroke-width: 1; stroke-dasharray: 8 6; transform-origin: 24px 24px; animation: signal-orbit 8s linear infinite; }
-.protocol-core__sail { filter: drop-shadow(0 3px 3px rgba(40,43,86,.16)); }
+.protocol-core__depth { fill: rgba(42,35,37,.18); transform: translate(1.7px, 2.5px); filter: blur(.4px); }
+.protocol-core__sail { filter: drop-shadow(0 5px 4px rgba(50,36,38,.16)); }
 .protocol-core__sail--right { fill: #263a59; }
-.protocol-core__wake { fill: none; stroke: #9AF0D4; stroke-width: 1.6; stroke-linecap: round; }
-.protocol-core__node { fill: #ff9b78; transform-origin: 24px 24px; animation: signal-orbit 8s linear infinite; filter: drop-shadow(0 0 4px rgba(255,125,91,.7)); }
+.protocol-core__fold { fill: rgba(255,246,225,.18); }
+.protocol-core__edge { fill: none; stroke: rgba(255,255,255,.8); stroke-width: 1.15; stroke-linecap: round; }
 .protocol-core--hero { width: 92px; height: 92px; filter: drop-shadow(0 20px 24px rgba(38,75,104,.2)); }
-.protocol-core--hero .protocol-core__sail--left { transform-origin: 24px 24px; animation: mark-breathe 5s ease-in-out infinite; }
-.protocol-core--header .protocol-core__signal { display: none; }
-.protocol-core--hero.is-active .protocol-core__signal, .protocol-core--hero.is-active .protocol-core__node { animation-duration: 1.25s; }
-.protocol-core--score .protocol-core__signal { stroke: rgba(48,134,151,.56); }
-.protocol-core--proof .protocol-core__signal { stroke-dasharray: 3 3; stroke: rgba(89,96,170,.55); }
-.protocol-core--position .protocol-core__signal, .protocol-core--anchor .protocol-core__signal { stroke: rgba(39,139,111,.58); }
+.protocol-core--hero.is-active { transform: translateY(-2px); filter: drop-shadow(0 24px 26px rgba(71,40,45,.24)); }
 
 .score-loader { min-height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .score-loader__stage { position: relative; display: grid; place-items: center; width: 170px; height: 170px; margin-bottom: 1rem; }
