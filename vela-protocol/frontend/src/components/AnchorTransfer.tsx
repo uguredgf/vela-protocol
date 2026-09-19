@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { RefreshCcw, ArrowRight, Building, Wallet, Key, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
 import { sep10Auth, sep6Deposit, simulateBankTransfer, getTransactionStatus } from '../services/anchor';
-import { withdrawToAnchor } from '../services/anchorPayment';
+import { getUsdcBalance, withdrawToAnchor } from '../services/anchorPayment';
 import { Keypair, Transaction, Networks } from '@stellar/stellar-sdk';
 import { signWithFreighter } from '../services/freighter';
 import { getExplorerUrl } from '../services/stellar';
@@ -27,6 +27,26 @@ export const AnchorTransfer: React.FC = () => {
   const [anchorJwt, setAnchorJwt] = useState<string | null>(null);
   const [finalStatus, setFinalStatus] = useState<string | null>(null);
   const [withdrawHash, setWithdrawHash] = useState<string | null>(null);
+  const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [balanceError, setBalanceError] = useState<string | null>(null);
+
+  const refreshUsdcBalance = useCallback(async () => {
+    if (!classicAccount) return;
+    setBalanceLoading(true);
+    setBalanceError(null);
+    try {
+      setUsdcBalance(await getUsdcBalance(classicAccount.publicKey));
+    } catch {
+      setBalanceError('Live balance is temporarily unavailable. It will be checked again before sending.');
+    } finally {
+      setBalanceLoading(false);
+    }
+  }, [classicAccount]);
+
+  useEffect(() => {
+    if (mode === 'withdraw') void refreshUsdcBalance();
+  }, [mode, refreshUsdcBalance]);
 
   const authenticateAnchor = async () => {
     if (!classicAccount) throw new Error('Connect a classic G-address first');
@@ -94,6 +114,11 @@ export const AnchorTransfer: React.FC = () => {
       if (!/^(?:0|[1-9]\d*)(?:\.\d{1,7})?$/.test(amount) || Number(amount) <= 0) {
         throw new Error('Enter a positive USDC amount with at most 7 decimals');
       }
+      const liveBalance = await getUsdcBalance(classicAccount.publicKey);
+      setUsdcBalance(liveBalance);
+      if (Number(amount) > Number(liveBalance)) {
+        throw new Error(`Your Stellar account has ${liveBalance} USDC available. Enter ${liveBalance} USDC or less.`);
+      }
       const jwt = await authenticateAnchor();
       setAnchorJwt(jwt);
       setStep('requesting');
@@ -111,6 +136,7 @@ export const AnchorTransfer: React.FC = () => {
         completedAt: result.status.completed_at,
         txHash: result.hash,
       });
+      await refreshUsdcBalance();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Withdrawal failed');
       setStep('error');
@@ -232,17 +258,47 @@ export const AnchorTransfer: React.FC = () => {
         <div className="p-8 space-y-6">
           {/* Amount input */}
           <div className="space-y-2">
-            <label className="text-gray-400 text-sm">Amount ({mode === 'deposit' ? 'TRY' : 'USDC'})</label>
+            <div className="flex items-center justify-between gap-3">
+              <label className="text-gray-400 text-sm">Amount ({mode === 'deposit' ? 'TRY' : 'USDC'})</label>
+              {mode === 'withdraw' && (
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-gray-500">
+                    Available: <strong className="text-gray-700">{balanceLoading ? 'Checking…' : `${usdcBalance ?? '—'} USDC`}</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => usdcBalance && setAmount(usdcBalance)}
+                    disabled={!usdcBalance || balanceLoading || (step !== 'idle' && step !== 'error')}
+                    className="rounded-full border border-accent/25 px-2.5 py-1 font-semibold text-accent transition-colors hover:bg-accent/10 disabled:opacity-40"
+                  >
+                    Max
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void refreshUsdcBalance()}
+                    disabled={balanceLoading}
+                    aria-label="Refresh USDC balance"
+                    className="rounded-full border border-black/10 p-1.5 text-gray-500 transition-colors hover:text-accent disabled:opacity-40"
+                  >
+                    <RefreshCcw size={13} className={balanceLoading ? 'animate-spin' : ''} />
+                  </button>
+                </div>
+              )}
+            </div>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder={mode === 'deposit' ? 'e.g. 100' : 'e.g. 1'}
               min={mode === 'deposit' ? '50' : '0.0000001'}
-              max={mode === 'deposit' ? '300' : undefined}
+              max={mode === 'deposit' ? '300' : usdcBalance ?? undefined}
               disabled={step !== 'idle' && step !== 'error'}
               className="w-full bg-surface border border-white/10 rounded-xl p-4 text-xl outline-none focus:border-accent transition-colors disabled:opacity-50"
             />
+            {mode === 'withdraw' && balanceError && <p className="text-xs text-amber-700">{balanceError}</p>}
+            {mode === 'withdraw' && usdcBalance && Number(amount) > Number(usdcBalance) && (
+              <p className="text-xs text-red-600">This exceeds your available balance. Choose Max or enter a smaller amount.</p>
+            )}
           </div>
 
           {/* Anchor info */}
@@ -268,7 +324,7 @@ export const AnchorTransfer: React.FC = () => {
 
           {mode === 'withdraw' && (step === 'idle' || step === 'error') && (
             <button onClick={handleWithdraw}
-              disabled={!amount || loading || !classicAccount || Number(amount) <= 0}
+              disabled={!amount || loading || !classicAccount || Number(amount) <= 0 || (!!usdcBalance && Number(amount) > Number(usdcBalance))}
               className="w-full bg-accent hover:bg-accent/80 py-4 rounded-xl font-semibold transition-colors disabled:opacity-50 flex justify-center items-center gap-2">
               {loading ? <RefreshCcw className="animate-spin" size={18} /> : <ArrowRight size={18} />}
               Send USDC Withdrawal on Testnet

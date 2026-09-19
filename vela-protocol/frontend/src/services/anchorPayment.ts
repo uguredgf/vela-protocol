@@ -4,16 +4,30 @@ import { signWithFreighter } from './freighter';
 import { USDC_ISSUER, getTransactionStatus, sep6Withdraw } from './anchor';
 import { TransactionStatus } from '../types';
 
+const horizon = new Horizon.Server('https://horizon-testnet.stellar.org');
+
+export async function getUsdcBalance(publicKey: string): Promise<string> {
+  if (!StrKey.isValidEd25519PublicKey(publicKey)) throw new Error('A valid Stellar account is required');
+  const source = await horizon.loadAccount(publicKey);
+  const balance = source.balances.find(b =>
+    (b.asset_type === 'credit_alphanum4' || b.asset_type === 'credit_alphanum12') &&
+    b.asset_code === 'USDC' &&
+    b.asset_issuer === USDC_ISSUER
+  );
+  return balance?.balance ?? '0.0000000';
+}
+
 export async function withdrawToAnchor(account: ClassicAccount, jwt: string, amount: string): Promise<{ hash: string; status: TransactionStatus }> {
   if (!StrKey.isValidEd25519PublicKey(account.publicKey) || !/^(?:0|[1-9]\d*)(?:\.\d{1,7})?$/.test(amount) || Number(amount) <= 0) {
     throw new Error('A classic account and positive USDC amount (up to 7 decimals) are required');
   }
-  const server = new Horizon.Server('https://horizon-testnet.stellar.org');
-  const source = await server.loadAccount(account.publicKey);
+  const source = await horizon.loadAccount(account.publicKey);
   const asset = new Asset('USDC', USDC_ISSUER);
   const balance = source.balances.find(b => (b.asset_type === 'credit_alphanum4' || b.asset_type === 'credit_alphanum12') && b.asset_code === 'USDC' && b.asset_issuer === USDC_ISSUER);
   if (!balance) throw new Error('This account has no anchor USDC trustline. XLM collateral in Blend cannot be withdrawn as USDC.');
-  if (Number(balance.balance) < Number(amount)) throw new Error(`Insufficient anchor USDC: available ${balance.balance}, requested ${amount}.`);
+  if (Number(balance.balance) < Number(amount)) {
+    throw new Error(`Your Stellar account has ${balance.balance} USDC available. Enter ${balance.balance} USDC or less.`);
+  }
   const instructions = await sep6Withdraw(jwt, account.publicKey, amount);
   if (!instructions.id || !StrKey.isValidEd25519PublicKey(instructions.account_id)) throw new Error('Anchor returned invalid withdrawal instructions');
   if (!instructions.memo || !['text', 'id'].includes(instructions.memo_type)) {
@@ -32,7 +46,7 @@ export async function withdrawToAnchor(account: ClassicAccount, jwt: string, amo
   const signed = account.secret
     ? (tx.sign(Keypair.fromSecret(account.secret)), tx)
     : new Transaction(await signWithFreighter(tx.toEnvelope().toXDR('base64'), account.publicKey), Networks.TESTNET);
-  const submitted = await server.submitTransaction(signed);
+  const submitted = await horizon.submitTransaction(signed);
   for (let i = 0; i < 15; i++) {
     const status = await getTransactionStatus(jwt, instructions.id);
     if (status.status !== 'pending_user_transfer_start' && status.status !== 'pending_user_transfer_complete') {
