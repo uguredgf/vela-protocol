@@ -26,9 +26,9 @@ export const Stepper: React.FC = () => {
 
           return (
             <div key={step.path} className="stepper-item flex flex-col items-center relative">
-              <div 
+              <div
                 className={`stepper-node w-10 h-10 rounded-full flex items-center justify-center font-bold z-10 transition-colors cursor-pointer ${
-                  isCompleted ? 'bg-success text-white' : 
+                  isCompleted ? 'bg-success text-white' :
                   isCurrent ? 'bg-accent text-white ring-4 ring-accent/20' : 'bg-surface text-gray-500'
                 }`}
                 onClick={() => {
