@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postinstall": "patch-package",
     "preview": "vite preview",
     "verify:live": "node scripts/verify-live-stack.mjs",
     "verify:anchor": "node test-anchor-deposit.mjs"
@@ -27,6 +28,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^6.1.1",
     "autoprefixer": "^10.4.0",
+    "patch-package": "^8.0.1",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.5.0",
