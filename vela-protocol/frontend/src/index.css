@@ -410,7 +410,7 @@
 .hero-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.12fr) minmax(360px, .88fr);
-  align-items: stretch;
+  align-items: start;
   gap: 1.25rem;
 }
 
@@ -488,6 +488,7 @@
 .stateful-action:disabled { cursor: not-allowed; opacity: .62; }
 .evidence-link { border-radius: .8rem; transition: background-color .2s ease; }
 .evidence-link:hover { background: rgba(122,41,56,.06); }
+.evidence-link--compact { min-height: 2.35rem; font-size: .72rem; }
 
 .trust-list { display: grid; gap: .55rem; }
 .trust-list > div { display: flex; align-items: center; gap: .65rem; color: #4f5867; font-size: .84rem; font-weight: 650; }
@@ -548,9 +549,26 @@
 .login-choice__copy strong { font-size: .88rem; }
 .login-choice__copy small { margin-top: .23rem; color: #69758a; font-size: .67rem; font-weight: 500; line-height: 1.4; }
 .login-choice__tag { flex: 0 0 auto; padding: .22rem .4rem; border-radius: 999px; color: #1f7068; background: rgba(31,112,104,.1); font-size: .56rem; font-weight: 800; letter-spacing: .1em; }
-.login-divider { display: flex; align-items: center; gap: .7rem; color: #8792a4; font-size: .62rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: rgba(69,82,108,.12); }
-.account-model-note { display: flex; align-items: flex-start; gap: .65rem; padding: .7rem .8rem; border-radius: .75rem; color: #5e6c82; background: rgba(255,255,255,.34); font-size: .66rem; line-height: 1.5; }
+.history-requirement { margin: -.15rem .15rem .1rem; color: #6f7a8d; font-size: .65rem; line-height: 1.45; }
+.history-requirement::before { content: ''; display: inline-block; width: .38rem; height: .38rem; margin-right: .42rem; border-radius: 50%; background: #b28a4f; box-shadow: 0 0 0 3px rgba(178,138,79,.1); vertical-align: .05rem; }
+.login-disclosure, .account-model-toggle { display: flex; align-items: center; width: 100%; border: 1px solid rgba(69,82,108,.13); color: #344057; background: rgba(255,255,255,.32); text-align: left; transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease; }
+.login-disclosure-group { display: grid; gap: .65rem; }
+.login-disclosure { gap: .75rem; min-height: 3.85rem; padding: .72rem .82rem; border-radius: .9rem; }
+.login-disclosure:hover, .account-model-toggle:hover { border-color: rgba(122,41,56,.22); background: rgba(255,255,255,.5); }
+.login-disclosure:focus-visible, .account-model-toggle:focus-visible { outline: 2px solid rgba(122,41,56,.42); outline-offset: 2px; }
+.login-disclosure__copy { display: flex; flex: 1; flex-direction: column; min-width: 0; line-height: 1.25; }
+.login-disclosure__copy strong { font-size: .82rem; }
+.login-disclosure__copy small { margin-top: .2rem; color: #718096; font-size: .64rem; line-height: 1.35; }
+.login-disclosure__chevron, .account-model-toggle > svg:last-child { flex: 0 0 auto; color: #7a2938; transition: transform .2s ease; }
+.login-disclosure.is-open .login-disclosure__chevron, .account-model-toggle.is-open > svg:last-child { transform: rotate(180deg); }
+.login-disclosure__panel { display: grid; gap: .65rem; overflow: hidden; }
+.account-model-toggle { gap: .6rem; padding: .58rem .72rem; border-radius: .75rem; }
+.account-model-toggle > svg:first-child { flex: 0 0 auto; color: #1f7068; }
+.account-model-toggle > span { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.account-model-toggle strong { color: #344057; font-size: .7rem; }
+.account-model-toggle small { margin-top: .12rem; overflow: hidden; color: #718096; font-size: .6rem; text-overflow: ellipsis; white-space: nowrap; }
+.account-model-note { display: flex; align-items: flex-start; gap: .65rem; overflow: hidden; padding: 0 .8rem; border-radius: .75rem; color: #5e6c82; background: rgba(255,255,255,.34); font-size: .66rem; line-height: 1.5; }
+.account-model-note p { padding-block: .7rem; }
 .account-model-note svg { flex: 0 0 auto; margin-top: .08rem; color: #1f7068; }
 .account-model-note strong, .account-model-note b { color: #344057; }
 .freighter-help-link { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; margin-top: -.25rem; padding: .35rem .5rem; border-radius: .6rem; color: #7a2938; font-size: .7rem; font-weight: 700; }

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { assertPasskeyEnvironment, createWallet, connectWallet } from '../services/passkey';
 import { bindClassicAccount, createFundedClassicAccount, hasBoundClassicAccount, PENDING_DEPLOY_SOURCE_KEY, provisionClassicAccount, restorePendingClassicAccount } from '../services/classicAccount';
 import { connectFreighter } from '../services/freighter';
-import { ArrowUpRight, Fingerprint, History, KeyRound, ShieldCheck, Wallet } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Fingerprint, History, KeyRound, ShieldCheck, Wallet } from 'lucide-react';
 import { ProtocolCore } from './ui/ProtocolCore';
 import { StatefulAction } from './ui/StatefulAction';
 
@@ -15,6 +15,28 @@ export const PasskeyLogin: React.FC = () => {
   const [connectingAction, setConnectingAction] = useState<'create' | 'passkey' | 'freighter' | null>(null);
   const isConnecting = connectingAction !== null;
   const [error, setError] = useState<string | null>(null);
+  const [passkeyOptionsOpen, setPasskeyOptionsOpen] = useState(false);
+  const [scoreInfoOpen, setScoreInfoOpen] = useState(false);
+  const passkeyDisclosureRef = useRef<HTMLDivElement>(null);
+  const scoreDisclosureRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const closeDisclosures = (event: KeyboardEvent | PointerEvent) => {
+      if (event instanceof KeyboardEvent && event.key !== 'Escape') return;
+      if (event instanceof PointerEvent) {
+        const target = event.target as Node;
+        if (passkeyDisclosureRef.current?.contains(target) || scoreDisclosureRef.current?.contains(target)) return;
+      }
+      setPasskeyOptionsOpen(false);
+      setScoreInfoOpen(false);
+    };
+    document.addEventListener('keydown', closeDisclosures);
+    document.addEventListener('pointerdown', closeDisclosures);
+    return () => {
+      document.removeEventListener('keydown', closeDisclosures);
+      document.removeEventListener('pointerdown', closeDisclosures);
+    };
+  }, []);
 
   const loginError = (e: unknown): string => {
     const error = e as { message?: string; code?: string | number; cause?: unknown };
@@ -154,45 +176,103 @@ export const PasskeyLogin: React.FC = () => {
           <span className="login-choice__tag">LIVE</span>
         </StatefulAction>
 
-        <div className="login-divider"><span>Passkey identity</span></div>
+        <p className="history-requirement">Live score needs at least 5 qualifying payments across 7 days.</p>
 
-        <StatefulAction
-          onClick={handleCreate}
-          disabled={isConnecting}
-          state={connectingAction === 'create' ? 'working' : 'idle'}
-          workingLabel="Creating testnet identity…"
-          icon={<KeyRound size={20} />}
-          className="login-choice secondary-action"
-        >
-          <span className="login-choice__copy"><strong>Create a new Passkey identity</strong><small>Creates a new C-wallet and helper G-account · opens a labelled sample because a new account has no history</small></span>
-        </StatefulAction>
+        <div className="login-disclosure-group" ref={passkeyDisclosureRef}>
+          <button
+            type="button"
+            className={`login-disclosure ${passkeyOptionsOpen ? 'is-open' : ''}`}
+            aria-expanded={passkeyOptionsOpen}
+            aria-controls="passkey-options"
+            onClick={() => {
+              setScoreInfoOpen(false);
+              setPasskeyOptionsOpen(open => !open);
+            }}
+          >
+            <span className="login-choice__icon"><Fingerprint size={19} /></span>
+            <span className="login-disclosure__copy">
+              <strong>Passkey identity options</strong>
+              <small>C-wallet identity with a separate helper G-account</small>
+            </span>
+            <ChevronDown className="login-disclosure__chevron" size={18} />
+          </button>
 
-        <StatefulAction
-          onClick={handleConnect}
-          disabled={isConnecting}
-          state={connectingAction === 'passkey' ? 'working' : 'idle'}
-          workingLabel="Reconnecting passkey…"
-          icon={<Fingerprint size={20} />}
-          className="login-choice secondary-action"
-        >
-          <span className="login-choice__copy"><strong>Reconnect an existing Passkey</strong><small>Restores the C-wallet; Vela can only score its session-linked G-account, not the C-address itself</small></span>
-        </StatefulAction>
+          <AnimatePresence initial={false}>
+            {passkeyOptionsOpen && (
+              <motion.div
+                id="passkey-options"
+                className="login-disclosure__panel"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+              >
+                <StatefulAction
+                  onClick={handleCreate}
+                  disabled={isConnecting}
+                  state={connectingAction === 'create' ? 'working' : 'idle'}
+                  workingLabel="Creating testnet identity…"
+                  icon={<KeyRound size={20} />}
+                  className="login-choice secondary-action"
+                >
+                  <span className="login-choice__copy"><strong>Create a new Passkey identity</strong><small>Creates a new C-wallet and helper G-account · opens a labelled sample because a new account has no history</small></span>
+                </StatefulAction>
 
-        <div className="account-model-note">
-          <History size={17} />
-          <p><strong>What is scored?</strong> Stellar Horizon history belonging to a classic <b>G-address</b>. A Passkey <b>C-address</b> is the secure smart-wallet identity; it does not automatically contain your old wallet history.</p>
+                <StatefulAction
+                  onClick={handleConnect}
+                  disabled={isConnecting}
+                  state={connectingAction === 'passkey' ? 'working' : 'idle'}
+                  workingLabel="Reconnecting passkey…"
+                  icon={<Fingerprint size={20} />}
+                  className="login-choice secondary-action"
+                >
+                  <span className="login-choice__copy"><strong>Reconnect an existing Passkey</strong><small>Restores the C-wallet; Vela can only score its session-linked G-account, not the C-address itself</small></span>
+                </StatefulAction>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="login-disclosure-group" ref={scoreDisclosureRef}>
+          <button
+            type="button"
+            className={`account-model-toggle ${scoreInfoOpen ? 'is-open' : ''}`}
+            aria-expanded={scoreInfoOpen}
+            aria-controls="score-source-explanation"
+            onClick={() => {
+              setPasskeyOptionsOpen(false);
+              setScoreInfoOpen(open => !open);
+            }}
+          >
+            <History size={17} />
+            <span><strong>What will Vela score?</strong><small>Public Horizon history from a classic G-address</small></span>
+            <ChevronDown size={16} />
+          </button>
+          <AnimatePresence initial={false}>
+            {scoreInfoOpen && (
+              <motion.div
+                id="score-source-explanation"
+                className="account-model-note"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+              >
+                <p>Vela reads Stellar Horizon history belonging to a classic <b>G-address</b>. A Passkey <b>C-address</b> is the smart-wallet identity; it does not automatically contain an old wallet's history.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <button
           type="button"
           onClick={() => navigate('/evidence')}
-          className="evidence-link text-accent px-2 py-2 font-semibold flex items-center justify-center gap-2"
+          className="evidence-link evidence-link--compact text-accent px-2 py-2 font-semibold flex items-center justify-center gap-2"
         >
           <ShieldCheck size={20} />
           View Live Testnet Evidence
           <ArrowUpRight size={16} />
         </button>
-        <p className="text-[11px] leading-relaxed text-gray-500 px-2">A live signal requires at least 5 non-bootstrap payments spanning 7 days. New or Friendbot-only accounts open the clearly-labelled sample walkthrough instead.</p>
         </div>
       </div>
     </motion.div>
