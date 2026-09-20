@@ -22,7 +22,7 @@ Vela Protocol is a hackathon integration prototype that derives a demonstrative 
 1. **Privacy by construction**: Raw transaction history and the score stay off-chain; the current contract receives only a commitment and threshold claim
 2. **AI-Enriched Signal Demo**: Explainable ML trained on synthetic behavior profiles, with a minimum-history gate
 3. **Real DeFi Integration**: A real Soroban-to-Blend collateral-supply transaction on testnet; borrow/repay/withdraw are roadmap work
-4. **Anchor integration**: SEP-10/SEP-6 flows are exercised against the TR Mock Anchor testnet sandbox; Stellar USDC payment settlement is real testnet activity
+4. **Anchor integration**: SEP-10/SEP-6 flows are exercised against the TR Mock Anchor testnet sandbox. Freighter deposits establish the configured USDC trustline with wallet approval when needed. The external payout worker may remain pending, and the UI does not report completion until the account actually receives USDC
 5. **Identity replay prototype**: An Anchor SEP-12 sandbox `customer_id` is hashed locally and duplicate submitted hashes are rejected; on-chain Anchor attestation is not yet implemented
 
 ---
@@ -61,7 +61,7 @@ Vela Protocol is a hackathon integration prototype that derives a demonstrative 
 5. **Identity-hash preparation** — SEP-10 authenticates the classic G-address; SEP-12 returns a `customer_id` that is SHA-256 hashed in the browser
 6. **On-Chain Gatekeeper** — Soroban rejects a repeated submitted identity hash and executes the configured Blend supply path; it does not verify the hash's Anchor origin
 7. **Blend Position** — The deployed contract supplies user collateral plus subsidy to Blend; borrow, repay, and user withdrawal are not implemented
-8. **Anchor Transfer** — SEP-6 withdraw returns an anchor address/memo; the classic G-address sends real testnet USDC and the UI polls the returned anchor transaction
+8. **Anchor Transfer** — A deposit checks or creates the configured USDC trustline, authenticates through SEP-10, opens the SEP-6 sandbox flow, and persists pending status so the user can resume checking later. A withdrawal submits real testnet USDC only when the account has sufficient balance
 
 ---
 
@@ -152,6 +152,25 @@ The FastAPI scoring service is deployed separately at `https://vela-ai-scoring.v
 
 The public `/evidence` route checks the deployed model service and demonstrates that sparse accounts are rejected, then links directly to verified Stellar Expert transactions. The published position fixture proves the collateral-supply integration only; it uses a one-byte placeholder proof and zero identity hash and is labeled accordingly.
 
+### 5. Verification
+
+Run the read-only checks against the deployed stack:
+
+```bash
+cd frontend
+npm run verify:live
+```
+
+The command checks the frontend shell, scoring service, minimum-history gate, deployed gatekeeper, published Blend and gatekeeper evidence, Anchor discovery and trust pins, Anchor control-plane health, and the passkey recovery indexer. Anchor health confirms that the gateway responds; it does not claim that the separate payout worker completed a transfer.
+
+Run the state-changing Anchor sandbox test only when a fresh testnet transaction is appropriate:
+
+```bash
+npm run verify:anchor
+```
+
+This test creates a fresh testnet account, establishes the configured USDC trustline, completes SEP-10, starts a SEP-6 deposit, simulates the sandbox bank transfer, and polls for delivery. If the external payout worker leaves the transaction in `pending_anchor` or no USDC arrives, the script fails explicitly and skips withdrawal.
+
 ---
 
 ## 🔧 Technology Stack
@@ -213,6 +232,8 @@ Live testnet evidence:
 
 - [Gatekeeper deployment](https://stellar.expert/explorer/testnet/tx/f924cb43d67a19aeec69a8d76e35c366bea5c71416cac0b11dbf51a25544b0c5)
 - [Blend collateral-supply fixture (placeholder proof / zero identity)](https://stellar.expert/explorer/testnet/tx/bcec10737c1f4f538c142eca78c7de9540f9746d7e21f0680ff808ad7e84ab39)
+
+Current Anchor boundary: discovery, SEP-10, SEP-6 request creation, transaction lookup, and treasury health respond successfully. During the latest end-to-end check, the external payout worker left the deposit in `pending_anchor` and did not deliver USDC. Vela preserves that status for a later retry and never presents it as a completed transfer.
 
 ---
 

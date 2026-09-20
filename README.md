@@ -11,6 +11,21 @@ Vela is a Stellar testnet prototype for privacy-aware risk signals, submitted id
 
 The static frontend is deployed on Vercel. The AI scoring service runs separately as a FastAPI process; see the setup guide for local development and deployment requirements.
 
+## Current demo status
+
+- The public evidence route, scoring API, minimum-history gate, deployed gatekeeper, and published Blend transaction are live and independently checkable.
+- The verified Blend fixture supplies `1.0 XLM` from the user plus a `0.4 XLM` subsidy. It does not borrow funds.
+- The Anchor control plane currently responds to discovery, SEP-10 authentication, and SEP-6 requests. The external sandbox payout worker can leave a deposit in `pending_anchor`, so Vela keeps the transfer pending and offers a safe resume/check action instead of showing a false success.
+- A Freighter deposit checks for the configured testnet USDC trustline and asks the wallet to approve `changeTrust` when it is missing.
+
+Run the non-mutating live verification from `vela-protocol/frontend`:
+
+```bash
+npm run verify:live
+```
+
+`npm run verify:anchor` creates and funds a fresh testnet account and exercises the state-changing SEP-6 sandbox path. It exits with a failure when the external payout worker does not deliver USDC, and it deliberately skips an invalid withdrawal attempt.
+
 ## Demo evidence
 
 The screenshots below were captured from the live deployment and Stellar testnet on 19 September 2026. They are presentation evidence, not mocked completion screens.
