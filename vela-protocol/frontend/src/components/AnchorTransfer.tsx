@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { RefreshCcw, ArrowRight, Building, Wallet, Key, CheckCircle, AlertTriangle, ExternalLink, Info } from 'lucide-react';
-import { sep10Auth, sep6Deposit, simulateBankTransfer, getTransactionStatus } from '../services/anchor';
+import { sep10Auth, sep6Deposit, simulateBankTransfer, getTransactionStatus, getAnchorHealth, type AnchorHealth } from '../services/anchor';
 import { getUsdcBalance, withdrawToAnchor } from '../services/anchorPayment';
 import { Keypair, Transaction, Networks } from '@stellar/stellar-sdk';
 import { signWithFreighter } from '../services/freighter';
@@ -32,6 +32,18 @@ export const AnchorTransfer: React.FC = () => {
   const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [balanceError, setBalanceError] = useState<string | null>(null);
+  const [anchorHealth, setAnchorHealth] = useState<AnchorHealth | null>(null);
+  const [anchorHealthError, setAnchorHealthError] = useState<string | null>(null);
+
+  const refreshAnchorHealth = useCallback(async () => {
+    setAnchorHealthError(null);
+    try {
+      setAnchorHealth(await getAnchorHealth());
+    } catch (healthError) {
+      setAnchorHealth(null);
+      setAnchorHealthError(healthError instanceof Error ? healthError.message : 'Anchor gateway is unavailable');
+    }
+  }, []);
 
   const refreshUsdcBalance = useCallback(async () => {
     if (!classicAccount) return;
@@ -49,6 +61,10 @@ export const AnchorTransfer: React.FC = () => {
   useEffect(() => {
     if (mode === 'withdraw') void refreshUsdcBalance();
   }, [mode, refreshUsdcBalance]);
+
+  useEffect(() => {
+    void refreshAnchorHealth();
+  }, [refreshAnchorHealth]);
 
   const authenticateAnchor = async () => {
     if (!classicAccount) throw new Error('Connect a classic G-address first');
@@ -269,6 +285,25 @@ export const AnchorTransfer: React.FC = () => {
         <Info size={19} className="mt-0.5 shrink-0" />
         <div><strong>Standalone Anchor interoperability demo</strong><p className="mt-1 text-xs text-gray-600">This rail uses the Stellar account’s existing USDC or a sandbox TRY deposit. It is separate from Blend and does not represent loan proceeds.</p></div>
       </div>
+
+      <div className={`flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm ${anchorHealth ? 'border-emerald-500/20 bg-emerald-500/8 text-emerald-800' : 'border-amber-500/25 bg-amber-500/8 text-amber-800'}`}>
+        <div className="flex items-center gap-2">
+          {anchorHealth ? <CheckCircle size={17} /> : <AlertTriangle size={17} />}
+          <span>
+            {anchorHealth
+              ? `Anchor gateway reachable · ${anchorHealth.stellarMode === 'live' ? 'Stellar testnet mode' : anchorHealth.stellarMode} · treasury ${Number(anchorHealth.treasuryUsdc).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`
+              : anchorHealthError || 'Checking Anchor gateway…'}
+          </span>
+        </div>
+        <button type="button" onClick={() => void refreshAnchorHealth()} className="shrink-0 rounded-full border border-current/20 p-1.5" aria-label="Recheck Anchor gateway">
+          <RefreshCcw size={14} />
+        </button>
+      </div>
+      {anchorHealth && (
+        <p className="-mt-4 px-1 text-[11px] leading-relaxed text-gray-500">
+          Gateway health confirms discovery and authentication only. Each payout is verified separately by its SEP-6 status and Stellar transaction hash.
+        </p>
+      )}
 
       {/* Identity Separation Panel */}
       <div className="support-panel p-5 md:p-6">

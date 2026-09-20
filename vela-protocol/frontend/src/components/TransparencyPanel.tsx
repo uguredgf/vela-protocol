@@ -54,7 +54,7 @@ export const TransparencyPanel: React.FC = () => {
   const navigate = useNavigate();
   const { score, guidedDemo, features, commitment, proofGenerated, position, identityVerified, classicAccount, anchorTransactions } = useStore();
   const [positionState, setPositionState] = useState<NetworkState>(position?.txHash ? 'checking' : 'idle');
-  const latestAnchor = useMemo(() => anchorTransactions.at(-1), [anchorTransactions]);
+  const latestAnchor = useMemo(() => anchorTransactions[anchorTransactions.length - 1], [anchorTransactions]);
   const [anchorPaymentState, setAnchorPaymentState] = useState<NetworkState>(latestAnchor?.txHash ? 'checking' : 'idle');
 
   useEffect(() => {

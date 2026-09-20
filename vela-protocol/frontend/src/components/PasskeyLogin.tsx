@@ -16,8 +16,8 @@ export const PasskeyLogin: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const loginError = (e: unknown): string => {
-    const error = e as { message?: string; code?: string; cause?: unknown };
-    const cause = error?.cause as { message?: string; code?: string; name?: string } | undefined;
+    const error = e as { message?: string; code?: string | number; cause?: unknown };
+    const cause = error?.cause as { message?: string; code?: string | number; name?: string } | undefined;
     const detail = cause?.message || (cause?.name && cause.name !== error?.message ? cause.name : undefined);
     const code = error?.code || cause?.code;
     if (e instanceof DOMException && e.name === 'NotAllowedError') {
@@ -25,6 +25,9 @@ export const PasskeyLogin: React.FC = () => {
     }
     if (e instanceof DOMException && e.name === 'InvalidStateError') {
       return 'This passkey is already registered here. Use Connect Passkey instead.';
+    }
+    if (code === 3004 || code === 3002) {
+      return `No usable Vela passkey was approved for ${window.location.hostname}. Passkeys are tied to the website hostname; open the exact domain where the old passkey was created, or create a new testnet passkey here.`;
     }
     if (detail || code) return `${error.message || 'Passkey operation failed'}${code ? ` [${code}]` : ''}${detail ? `: ${detail}` : ''}`;
     return e instanceof Error ? e.message : 'Wallet connection failed';

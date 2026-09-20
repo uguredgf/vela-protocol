@@ -1,4 +1,4 @@
-import { PasskeyKit } from 'passkey-kit';
+import { MercuryIndexer, PasskeyKit, PasskeyKitErrorCode, SignerKey } from 'passkey-kit';
 import { IndexedDBStorage } from 'passkey-kit/storage';
 import { Keypair, Networks, rpc, TransactionBuilder } from '@stellar/stellar-sdk';
 import { getSorobanTransactionStatus } from './sorobanStatus';
@@ -90,8 +90,36 @@ export async function createWallet(deploySource: string): Promise<{ address: str
 
 export async function connectWallet(): Promise<{ address: string; contractId: string; type: 'passkey' }> {
   assertPasskeyEnvironment();
-  const connected = await getKit().connectWallet();
-  return { address: connected.contractId, contractId: connected.contractId, type: 'passkey' };
+  const activeKit = getKit();
+  const indexer = MercuryIndexer.forNetwork(
+    { rpc: new rpc.Server(RPC_URL) },
+    NETWORK_PASSPHRASE,
+  );
+
+  try {
+    const connected = await activeKit.connectWallet({
+      // IndexedDB is origin-scoped. Mercury provides a fail-closed, keyless
+      // on-chain lookup when the browser still owns the passkey but the local
+      // wallet record was cleared or this is a fresh session on the same host.
+      ...(indexer ? {
+        getWalletCandidates: (keyId: string) => indexer.findWallets(SignerKey.Secp256r1(keyId)),
+      } : {}),
+    });
+    return { address: connected.contractId, contractId: connected.contractId, type: 'passkey' };
+  } catch (error) {
+    const code = (error as { code?: number })?.code;
+    if (code === PasskeyKitErrorCode.WALLET_NOT_FOUND) {
+      const recoveryError = new Error('This passkey is valid, but no Vela testnet wallet could be found for it. Use the exact website hostname where it was created, or create a new testnet passkey.') as Error & { cause?: unknown };
+      recoveryError.cause = error;
+      throw recoveryError;
+    }
+    if (code === PasskeyKitErrorCode.INDEXER_REQUEST_FAILED) {
+      const recoveryError = new Error('Your passkey was recognized, but wallet recovery is temporarily unavailable. Please retry in a moment.') as Error & { cause?: unknown };
+      recoveryError.cause = error;
+      throw recoveryError;
+    }
+    throw error;
+  }
 }
 
 export async function signTransaction(_xdr: string): Promise<string> {

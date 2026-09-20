@@ -12,6 +12,14 @@ export const ANCHOR_SIGNING_KEY = 'GDXYO6FJCNXZEWGXD54GT76FGFYLOLSOGSOJLNQ6WGHCG
 // Kapalıyken (varsayılan) her hata yukarı fırlatılır, sessizce sahte veriye düşülmez.
 const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 
+export interface AnchorHealth {
+  reachable: boolean;
+  stellarMode: string;
+  treasuryUsdc: string;
+  lowBalance: boolean;
+  checkedAt: string;
+}
+
 // Cached TOML data
 let cachedToml: StellarToml | null = null;
 
@@ -64,6 +72,33 @@ export async function fetchStellarToml(): Promise<StellarToml> {
 function extractTomlValue(line: string): string {
   const match = line.match(/=\s*"([^"]*)"/);
   return match ? match[1] : '';
+}
+
+/**
+ * Lightweight reachability check. This deliberately does not claim that an
+ * asynchronous payout worker is healthy; transaction status remains the source
+ * of truth for an individual SEP-6 transfer.
+ */
+export async function getAnchorHealth(): Promise<AnchorHealth> {
+  try {
+    const response = await axios.get(`${ANCHOR_BASE}/health`, { timeout: 8_000 });
+    const data = response.data;
+    const trusted = data?.ok === true &&
+      data?.network_passphrase === Networks.TESTNET &&
+      data?.sep?.signing_key === ANCHOR_SIGNING_KEY;
+    if (!trusted) throw new Error('Anchor health response failed trust checks');
+    return {
+      reachable: true,
+      stellarMode: String(data.stellar_mode || 'unknown'),
+      treasuryUsdc: String(data.treasury?.usdc_balance || 'unknown'),
+      lowBalance: data.treasury?.low_balance === true,
+      checkedAt: String(data.time || new Date().toISOString()),
+    };
+  } catch (error) {
+    const healthError = new Error('Anchor gateway is currently unreachable. No transfer was submitted.') as Error & { cause?: unknown };
+    healthError.cause = error;
+    throw healthError;
+  }
 }
 
 // ─── SEP-10: Authentication ─────────────────────────────────────────────────
