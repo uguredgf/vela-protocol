@@ -30,3 +30,4 @@ Thumbs.db
 presentation-private/
 
 .vercel
+.env*
