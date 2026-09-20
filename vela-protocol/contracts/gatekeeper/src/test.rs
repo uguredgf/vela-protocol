@@ -64,6 +64,69 @@ fn nested_blend_transfer_is_authorized_and_duplicate_rolls_back() {
     env.mock_all_auths();
     let second = client.try_open_position(&user, &proof, &inputs, &10_000_000, &identity_hash);
     assert!(std::format!("{second:?}").contains("IdentityAlreadyUsed"));
+
+    let different_identity = soroban_sdk::BytesN::from_array(&env, &[8u8; 32]);
+    let duplicate_commitment = client.try_open_position(&user, &proof, &inputs, &1, &different_identity);
+    assert!(std::format!("{duplicate_commitment:?}").contains("DuplicateCommitment"));
     assert_eq!(balances.balance(&pool), 14_000_000);
     assert_eq!(balances.balance(&gate), 16_000_000);
+}
+
+#[test]
+fn rejects_false_malformed_and_short_threshold_claims_without_moving_funds() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    let user = Address::generate(&env);
+    let asset = env.register_stellar_asset_contract_v2(admin.clone()).address();
+    let pool = env.register(TestBlend, ());
+    let gate = env.register(GatekeeperContract, ());
+    let client = GatekeeperContractClient::new(&env, &gate);
+    client.initialize(&admin, &pool, &asset, &asset, &asset);
+
+    env.mock_all_auths();
+    let issuer = token::StellarAssetClient::new(&env, &asset);
+    issuer.mint(&admin, &20_000_000);
+    issuer.mint(&user, &10_000_000);
+    client.fund_subsidy_pool(&admin, &20_000_000);
+
+    let proof = Bytes::new(&env);
+
+    let mut false_bytes = [3u8; 36];
+    false_bytes[32..].copy_from_slice(&0u32.to_be_bytes());
+    let false_inputs = Bytes::from_array(&env, &false_bytes);
+    let false_claim = client.try_open_position(
+        &user,
+        &proof,
+        &false_inputs,
+        &1_000_000,
+        &soroban_sdk::BytesN::from_array(&env, &[3u8; 32]),
+    );
+    assert!(std::format!("{false_claim:?}").contains("InvalidScore"));
+
+    let mut malformed_bytes = [4u8; 36];
+    malformed_bytes[32..].copy_from_slice(&2u32.to_be_bytes());
+    let malformed_inputs = Bytes::from_array(&env, &malformed_bytes);
+    let malformed_claim = client.try_open_position(
+        &user,
+        &proof,
+        &malformed_inputs,
+        &1_000_000,
+        &soroban_sdk::BytesN::from_array(&env, &[4u8; 32]),
+    );
+    assert!(std::format!("{malformed_claim:?}").contains("InvalidProof"));
+
+    let short_inputs = Bytes::from_array(&env, &[5u8; 35]);
+    let short_claim = client.try_open_position(
+        &user,
+        &proof,
+        &short_inputs,
+        &1_000_000,
+        &soroban_sdk::BytesN::from_array(&env, &[5u8; 32]),
+    );
+    assert!(std::format!("{short_claim:?}").contains("InvalidProof"));
+
+    let balances = token::Client::new(&env, &asset);
+    assert_eq!(balances.balance(&user), 10_000_000);
+    assert_eq!(balances.balance(&pool), 0);
+    assert_eq!(client.get_subsidy_balance(), 20_000_000);
 }

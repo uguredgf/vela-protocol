@@ -62,12 +62,12 @@ export const ScoreDisplay: React.FC = () => {
   if (isLoading || score === null) return <div className="score-loader" role="status" aria-live="polite">
     <div className="score-loader__stage"><span className="score-loader__ring score-loader__ring--one" /><span className="score-loader__ring score-loader__ring--two" /><VelaOracle active /></div>
     <h2 className="text-xl font-semibold">Reading your Stellar activity…</h2>
-    <p className="text-gray-400 mt-2">Vela is turning on-chain patterns into a private credit signal.</p>
+    <p className="text-gray-400 mt-2">Vela is turning public account patterns into a demonstrative behavioural signal.</p>
   </div>;
 
   return <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="score-page max-w-4xl mx-auto space-y-6 pb-12">
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 px-1">
-      <div><div className="text-[11px] uppercase tracking-[0.25em] text-accent mb-2">{guidedDemo ? 'Guided sample' : 'On-chain signal'}</div><h1 className="display-serif text-3xl md:text-4xl font-semibold tracking-tight">{guidedDemo ? 'Sample risk signal' : 'Your credit signal'}</h1><p className="text-gray-400 mt-2 max-w-xl">{guidedDemo ? 'A clearly labeled fictional profile for exploring the interface. It is not this account’s history or a lending result.' : 'A live behavioural read of the Stellar account powering this session.'}</p></div>
+      <div><div className="text-[11px] uppercase tracking-[0.25em] text-accent mb-2">{guidedDemo ? 'Guided sample' : 'Signal from public history'}</div><h1 className="display-serif text-3xl md:text-4xl font-semibold tracking-tight">{guidedDemo ? 'Sample behavioural signal' : 'Your behavioural signal'}</h1><p className="text-gray-400 mt-2 max-w-xl">{guidedDemo ? 'A clearly labeled fictional profile for exploring the interface. It is not this account’s history or a lending result.' : 'A live, demonstrative read of the public Stellar history powering this session—not a lending decision.'}</p></div>
       <div className={`inline-flex items-center gap-2 text-xs border px-3 py-2 rounded-full ${guidedDemo ? 'text-amber-700 bg-amber-500/10 border-amber-500/20' : 'text-emerald-700 bg-emerald-400/10 border-emerald-400/20'}`}><span className={`w-1.5 h-1.5 rounded-full ${guidedDemo ? 'bg-amber-500' : 'bg-emerald-400 animate-pulse'}`} /> {guidedDemo ? 'Fictional sample · no live claim' : 'Live Horizon data'}</div>
     </div>
     <div className="score-source-card" aria-label="Signal data source">

@@ -72,10 +72,10 @@ export const EvidencePanel: React.FC = () => {
 
       <div className="evidence-bento grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="support-panel p-5 md:col-span-1">
-          <div className="flex items-center gap-2 text-sm text-gray-400"><Activity size={18} /> AI service</div>
+          <div className="flex items-center gap-2 text-sm text-gray-400"><Activity size={18} /> Behavioural-signal service</div>
           <div className="mt-3 flex items-center gap-2 font-semibold">
             {verification.service === 'checking' && <><Loader2 className="animate-spin text-accent" size={18} /> Checking live endpoint</>}
-            {verification.service === 'online' && <><CheckCircle2 className="text-success" size={18} /> Online · model loaded</>}
+            {verification.service === 'online' && <><CheckCircle2 className="text-success" size={18} /> Online · demonstrative model loaded</>}
             {verification.service === 'offline' && <><AlertTriangle className="text-amber-400" size={18} /> Temporarily unavailable</>}
           </div>
           <a href={`${SCORING_API_URL}/health`} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1 text-xs text-accent underline break-all">

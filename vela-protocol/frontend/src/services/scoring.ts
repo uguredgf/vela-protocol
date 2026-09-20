@@ -2,9 +2,10 @@ import axios from 'axios';
 import { ScoreResult, ModelInfo, StellarTransaction } from '../types';
 import { StrKey } from '@stellar/stellar-sdk';
 
-const DEFAULT_API_BASE = import.meta.env.PROD
-  ? 'https://vela-ai-scoring.vercel.app'
-  : 'http://127.0.0.1:8001';
+// The public testnet scorer is the demo-safe default in both development and
+// production. Developers running the FastAPI service locally can still opt in
+// with VITE_SCORING_API_URL=http://127.0.0.1:8001.
+const DEFAULT_API_BASE = 'https://vela-ai-scoring.vercel.app';
 
 export const SCORING_API_URL = (import.meta.env.VITE_SCORING_API_URL || DEFAULT_API_BASE).replace(/\/$/, '');
 

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { calculatePosition, calculateSubsidyTier } from '../services/blend';
 import { submitOpenPosition } from '../services/gatekeeper';
 import { getExplorerUrl } from '../services/stellar';
-import { ExternalLink, Info, TrendingUp } from 'lucide-react';
+import { AlertTriangle, ExternalLink, Info, TrendingUp } from 'lucide-react';
 import { MultiStepLoader } from './ui/MultiStepLoader';
 import { sep10Auth, sep12KYC } from '../services/anchor';
 import { hashIdentity } from '../services/proof';
@@ -21,7 +21,8 @@ const PUBLIC_SUPPLY_FIXTURE = 'https://stellar.expert/explorer/testnet/tx/bcec10
 export const BlendPosition: React.FC = () => {
   const { classicAccount, score, guidedDemo, proofData, publicInputs, position, identityHash, setIdentity, setPosition } = useStore();
   const navigate = useNavigate();
-  const [amount, setAmount] = useState('1000');
+  const [amount, setAmount] = useState('1');
+  const [riskAccepted, setRiskAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const collateral = Number(amount);
@@ -30,7 +31,7 @@ export const BlendPosition: React.FC = () => {
   const tier = calculateSubsidyTier(score ?? 0);
 
   const handleOpenPosition = async () => {
-    if (!classicAccount || !proofData || !publicInputs || score === null || !validAmount) return;
+    if (!classicAccount || !proofData || !publicInputs || score === null || !validAmount || !riskAccepted) return;
     setLoading(true);
     setError(null);
     try {
@@ -91,8 +92,19 @@ export const BlendPosition: React.FC = () => {
               </div>
             ) : (
               <>
+                <label className="mvp-custody-warning">
+                  <input
+                    type="checkbox"
+                    checked={riskAccepted}
+                    onChange={event => setRiskAccepted(event.target.checked)}
+                  />
+                  <span>
+                    <strong><AlertTriangle size={17} /> Testnet MVP custody boundary</strong>
+                    I understand that this version supplies XLM into a Blend position owned by the gatekeeper contract and does not yet provide a user withdrawal or close-position path. I will use only a small, expendable testnet amount.
+                  </span>
+                </label>
                 <StatefulAction onClick={handleOpenPosition}
-                  disabled={loading || !classicAccount || !publicInputs || score === null || score < 60 || !validAmount}
+                  disabled={loading || !classicAccount || !publicInputs || score === null || score < 60 || !validAmount || !riskAccepted}
                   state={loading ? 'working' : 'idle'}
                   workingLabel="Submitting to Stellar testnet…"
                   className="w-full bg-accent text-white py-4 rounded-xl font-semibold">

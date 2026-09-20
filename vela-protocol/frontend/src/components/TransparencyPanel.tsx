@@ -123,7 +123,7 @@ export const TransparencyPanel: React.FC = () => {
         </div>
         <h1 className="display-serif text-3xl md:text-4xl font-semibold">Your verification receipt</h1>
         <p className="text-gray-400 max-w-2xl mx-auto">
-          A plain-language record of what happened in this session—and what each result actually proves. This is a prototype receipt, not a regulatory audit report.
+          A plain-language record of what happened in this session—and what each result actually proves. This prototype receipt does not certify eligibility, identity, or lending approval.
         </p>
       </div>
 

@@ -569,6 +569,23 @@
 .blend-proof-note summary { cursor: pointer; color: #7a2938; font-weight: 700; }
 .blend-proof-note details p { margin-top: .4rem; }
 
+.mvp-custody-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: .8rem;
+  padding: 1rem;
+  border: 1px solid rgba(164, 73, 85, .26);
+  border-radius: .95rem;
+  color: #6d5360;
+  background: rgba(164, 73, 85, .07);
+  font-size: .76rem;
+  line-height: 1.55;
+  cursor: pointer;
+}
+.mvp-custody-warning input { flex: 0 0 auto; width: 1rem; height: 1rem; margin-top: .18rem; accent-color: #7a2938; }
+.mvp-custody-warning span { display: grid; gap: .3rem; }
+.mvp-custody-warning strong { display: inline-flex; align-items: center; gap: .45rem; color: #7a2938; font-size: .8rem; }
+
 .vela-oracle { display: grid; place-items: center; width: 72px; height: 72px; color: #71313c; filter: drop-shadow(0 8px 14px rgba(83,55,44,.16)); }
 .vela-oracle svg { width: 100%; height: 100%; overflow: visible; }
 .vela-oracle__halo { fill: rgba(248,243,233,.9); stroke: #b28a4f; stroke-width: 2; }

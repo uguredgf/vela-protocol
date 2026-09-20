@@ -106,13 +106,13 @@ export const PasskeyLogin: React.FC = () => {
             </div>
           </div>
           <div className="eyebrow mb-4">
-            <span className="eyebrow__dot" /> Verified on Stellar testnet
+            <span className="eyebrow__dot" /> Selected flows verified on Stellar testnet
           </div>
           <h1 className="display-serif text-4xl md:text-[3.35rem] font-semibold mb-5 tracking-[-0.035em] leading-[0.98]">
             Credit context for<br className="hidden sm:block" /> <span className="text-accent">on-chain cash flow.</span>
           </h1>
           <p className="text-gray-400 mb-7 text-base md:text-lg max-w-2xl leading-relaxed">
-            Read eligible Stellar payment history into a demonstrative risk signal, prepare a private commitment, and verify a real collateral-supply path through Blend v2.
+            Read eligible Stellar payment history into a demonstrative behavioural signal, prepare a private commitment, and inspect a real collateral-supply path through Blend v2.
           </p>
 
           <div className="trust-list w-full" aria-label="Protocol safeguards">
