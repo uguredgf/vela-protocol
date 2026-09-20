@@ -60,7 +60,7 @@ Vela Protocol is a hackathon integration prototype that derives a demonstrative 
 4. **Score commitment** — Client-side SHA-256 commitment plus a 0/1 threshold claim; this MVP does not implement a Groth16 verifier
 5. **Identity-hash preparation** — SEP-10 authenticates the classic G-address; SEP-12 returns a `customer_id` that is SHA-256 hashed in the browser
 6. **On-Chain Gatekeeper** — Soroban rejects a repeated submitted identity hash and executes the configured Blend supply path; it does not verify the hash's Anchor origin
-7. **Blend Position** — The deployed contract supplies user collateral plus subsidy to Blend; the displayed borrow figure is an estimate, not a completed borrow call
+7. **Blend Position** — The deployed contract supplies user collateral plus subsidy to Blend; borrow, repay, and user withdrawal are not implemented
 8. **Anchor Transfer** — SEP-6 withdraw returns an anchor address/memo; the classic G-address sends real testnet USDC and the UI polls the returned anchor transaction
 
 ---

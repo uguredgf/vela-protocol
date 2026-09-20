@@ -142,15 +142,17 @@ export const PasskeyLogin: React.FC = () => {
             Continue Current Session
           </button>
         )}
-        <button
+        <StatefulAction
           onClick={handleFreighter}
           disabled={isConnecting}
+          state={connectingAction === 'freighter' ? 'working' : 'idle'}
+          workingLabel="Connecting Freighter…"
+          icon={<Wallet size={20} />}
           className="login-choice login-choice--recommended secondary-action text-left disabled:opacity-50"
         >
-          <span className="login-choice__icon"><Wallet size={20} /></span>
           <span className="login-choice__copy"><strong>Use my Freighter wallet</strong><small>Recommended · scores this G-address’s existing public payment history</small></span>
           <span className="login-choice__tag">LIVE</span>
-        </button>
+        </StatefulAction>
 
         <div className="login-divider"><span>Passkey identity</span></div>
 

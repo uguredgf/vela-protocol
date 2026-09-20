@@ -51,7 +51,7 @@ export const BlendPosition: React.FC = () => {
       const hash = await submitOpenPosition(classicAccount, proofData, publicInputs, collateral, verifiedIdentityHash);
       const calc = calculatePosition(collateral, score);
       setPosition({ id: 0, user: classicAccount.publicKey, collateral, subsidy: calc.subsidyAmount,
-        totalPosition: calc.totalPosition, borrowAmount: calc.borrowAmount, subsidyPercentage: calc.subsidyPercentage,
+        totalPosition: calc.totalPosition, subsidyPercentage: calc.subsidyPercentage,
         tier: tier.tier as 'high' | 'medium' | 'low', status: 'active', txHash: hash, timestamp: Date.now() });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Contract submission failed');
@@ -83,8 +83,6 @@ export const BlendPosition: React.FC = () => {
               <b>=</b>
               <div className="is-total"><span>Total supplied to Blend</span><strong>{formatAmount(estimate.totalPosition)} XLM</strong></div>
             </div>
-            <div className="supporting-row"><span>Illustrative 75% capacity assumption</span><strong>{formatAmount(estimate.borrowAmount)} XLM · not a live limit</strong></div>
-
             {guidedDemo ? (
               <div className="space-y-3">
                 <a href={PUBLIC_SUPPLY_FIXTURE} target="_blank" rel="noreferrer" className="w-full border border-accent/25 bg-accent/10 p-4 rounded-xl font-semibold inline-flex items-center justify-center gap-2 text-accent">View a completed Blend testnet transaction <ExternalLink size={16} /></a>
@@ -121,8 +119,8 @@ export const BlendPosition: React.FC = () => {
                 <div className="text-xl font-bold">{formatAmount(position.totalPosition)} XLM</div>
               </div>
               <div className="bg-surface p-4 rounded-lg border border-white/5">
-                <div className="text-gray-400 text-sm mb-1">Illustrative capacity (no borrow)</div>
-                <div className="text-xl font-bold">{formatAmount(position.borrowAmount)} XLM</div>
+                <div className="text-gray-400 text-sm mb-1">Vela subsidy supplied</div>
+                <div className="text-xl font-bold">{formatAmount(position.subsidy)} XLM</div>
               </div>
             </div>
             <button onClick={() => navigate('/anchor')}

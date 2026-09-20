@@ -12,7 +12,7 @@ function restorePosition(address: string | null): Position | null {
   if (!address) return null;
   try {
     const saved = JSON.parse(sessionStorage.getItem(positionKey(address)) || 'null');
-    if (saved?.user === address && /^[0-9a-f]{64}$/i.test(saved.txHash || '') && Number.isFinite(saved.totalPosition) && Number.isFinite(saved.borrowAmount)) {
+    if (saved?.user === address && /^[0-9a-f]{64}$/i.test(saved.txHash || '') && Number.isFinite(saved.totalPosition) && Number.isFinite(saved.subsidy)) {
       return saved as Position;
     }
   } catch {

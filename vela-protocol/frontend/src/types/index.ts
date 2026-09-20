@@ -6,7 +6,6 @@ export interface Position {
   collateral: number;
   subsidy: number;
   totalPosition: number;
-  borrowAmount: number;
   subsidyPercentage: number;
   tier: 'high' | 'medium' | 'low';
   status: 'pending' | 'active' | 'closed';

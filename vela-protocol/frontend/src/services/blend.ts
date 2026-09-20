@@ -36,25 +36,17 @@ export function calculatePosition(
   userCollateral: number;
   subsidyAmount: number;
   totalPosition: number;
-  borrowAmount: number;
   subsidyPercentage: number;
-  ltv: number;
 } {
   const { percentage } = calculateSubsidyTier(score);
   const subsidyAmount = (collateralAmount * percentage) / 100;
   const totalPosition = collateralAmount + subsidyAmount;
-  
-  // Blend v2 standard: ~75% LTV for USDC collateral
-  const ltv = 0.75;
-  const borrowAmount = totalPosition * ltv;
-  
+
   return {
     userCollateral: collateralAmount,
     subsidyAmount,
     totalPosition,
-    borrowAmount,
     subsidyPercentage: percentage,
-    ltv,
   };
 }
 
@@ -96,7 +88,6 @@ export async function openPosition(
     collateral: calc.userCollateral,
     subsidy: calc.subsidyAmount,
     totalPosition: calc.totalPosition,
-    borrowAmount: calc.borrowAmount,
     subsidyPercentage: calc.subsidyPercentage,
     tier: tier as 'high' | 'medium' | 'low',
     status: 'pending',
