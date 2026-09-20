@@ -75,13 +75,13 @@ await check('Anchor discovery and trust pins', async () => {
   return 'testnet TOML trusted';
 });
 
-await check('Anchor gateway health', async () => {
+await check('Anchor control-plane health', async () => {
   const response = await fetch(`${ANCHOR}/health`);
   assert.equal(response.status, 200);
   const body = await response.json();
   assert.equal(body.ok, true);
   assert.equal(body.sep?.signing_key, EXPECTED_SIGNING_KEY);
-  return `gateway ${body.stellar_mode}; treasury ${body.treasury?.usdc_balance ?? 'unknown'} USDC`;
+  return `gateway ${body.stellar_mode}; treasury ${body.treasury?.usdc_balance ?? 'unknown'} USDC; payout worker not covered`;
 });
 
 await check('Passkey recovery indexer', async () => {

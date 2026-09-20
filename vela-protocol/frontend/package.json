@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "verify:live": "node scripts/verify-live-stack.mjs"
+    "verify:live": "node scripts/verify-live-stack.mjs",
+    "verify:anchor": "node test-anchor-deposit.mjs"
   },
   "dependencies": {
     "@stellar/freighter-api": "^6.0.1",

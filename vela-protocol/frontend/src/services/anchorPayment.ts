@@ -14,6 +14,29 @@ export interface WithdrawSubmission {
   memoType: string;
 }
 
+export async function ensureUsdcTrustline(account: ClassicAccount): Promise<{ created: boolean; hash?: string }> {
+  if (!StrKey.isValidEd25519PublicKey(account.publicKey)) {
+    throw new Error('A valid Stellar account is required');
+  }
+  const source = await horizon.loadAccount(account.publicKey);
+  const existing = source.balances.some(balance =>
+    (balance.asset_type === 'credit_alphanum4' || balance.asset_type === 'credit_alphanum12') &&
+    balance.asset_code === 'USDC' &&
+    balance.asset_issuer === USDC_ISSUER
+  );
+  if (existing) return { created: false };
+
+  const tx = new TransactionBuilder(source, { fee: '100', networkPassphrase: Networks.TESTNET })
+    .addOperation(Operation.changeTrust({ asset: new Asset('USDC', USDC_ISSUER) }))
+    .setTimeout(180)
+    .build();
+  const signed = account.secret
+    ? (tx.sign(Keypair.fromSecret(account.secret)), tx)
+    : new Transaction(await signWithFreighter(tx.toEnvelope().toXDR('base64'), account.publicKey), Networks.TESTNET);
+  const submitted = await horizon.submitTransaction(signed);
+  return { created: true, hash: submitted.hash };
+}
+
 export async function getUsdcBalance(publicKey: string): Promise<string> {
   if (!StrKey.isValidEd25519PublicKey(publicKey)) throw new Error('A valid Stellar account is required');
   const source = await horizon.loadAccount(publicKey);

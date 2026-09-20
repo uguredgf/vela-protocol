@@ -168,12 +168,21 @@ async function main() {
   // ── Step 9: Check USDC balance ──
   console.log('\n9. Checking account balance...');
   const finalAccount = await server.loadAccount(pair.publicKey());
+  let finalUsdcBalance = '0';
   for (const bal of finalAccount.balances) {
     if (bal.asset_type === 'native') {
       console.log(`   XLM: ${bal.balance}`);
     } else if (bal.asset_code === 'USDC') {
+      finalUsdcBalance = bal.balance;
       console.log(`   USDC: ${bal.balance} (issuer: ${bal.asset_issuer?.substring(0, 12)}...)`);
     }
+  }
+
+  if (finalStatus !== 'completed' || Number(finalUsdcBalance) < 1) {
+    console.error('\nANCHOR PAYOUT NOT READY: deposit did not mint enough USDC. Withdrawal was intentionally skipped.');
+    console.error('This isolates the failure to the Anchor payout worker and avoids submitting a known-invalid payment.');
+    process.exitCode = 2;
+    return;
   }
 
   // ── Step 10: Real SEP-6 withdrawal payment ──

@@ -229,7 +229,7 @@ Live testnet evidence:
 - **Integration**: Blend v2 — real collateral supply through the Soroban gatekeeper
 - **Anchor/Local Payments**: TR Mock Anchor — SEP-6/10 (TRY bank side sandbox, Stellar USDC leg real on testnet)
 - **Core Feature**: Blend is the destination of the verified collateral-supply path; lending lifecycle remains roadmap work
-- **Current verification**: Live test script covers Friendbot, trustline, SEP-10, SEP-6 deposit polling, and SEP-6 withdrawal payment polling
+- **Verification**: `npm run verify:live` checks the deployed control plane and on-chain evidence without changing state. `npm run verify:anchor` performs the state-changing testnet SEP-6 flow and fails explicitly when the external payout worker leaves a deposit pending.
 - **Roadmap**: Full Groth16/zkML verification, Blend borrow/repay, production anchor partnership, and mainnet pilot
 
 ---
