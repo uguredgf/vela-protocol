@@ -32,7 +32,11 @@ export const Stepper: React.FC = () => {
 
           return (
             <div key={step.path} className="stepper-item flex flex-col items-center relative">
-              <div
+              <button
+                type="button"
+                aria-current={isCurrent ? 'step' : undefined}
+                aria-label={`${step.label}${isCompleted ? ' completed' : isCurrent ? ' current step' : ''}`}
+                disabled={index > currentStep}
                 className={`stepper-node w-10 h-10 rounded-full flex items-center justify-center font-bold z-10 transition-colors cursor-pointer ${
                   isCompleted ? 'bg-success text-white' :
                   isCurrent ? 'bg-accent text-white ring-4 ring-accent/20' : 'bg-surface text-gray-500'
@@ -42,7 +46,7 @@ export const Stepper: React.FC = () => {
                 }}
               >
                 {isCompleted ? <Check size={17} strokeWidth={3} /> : <step.icon size={17} />}
-              </div>
+              </button>
               <span className={`text-[10px] uppercase tracking-[0.12em] mt-2 ${isCurrent ? 'text-accent font-semibold' : 'text-gray-400'}`}>
                 {step.label}
               </span>

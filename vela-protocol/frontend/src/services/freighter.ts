@@ -13,7 +13,9 @@ export class FreighterNetworkError extends Error {
 
 export async function connectFreighter(): Promise<string> {
   const connection = await isConnected();
-  if (connection.error || !connection.isConnected) throw new Error('Freighter extension is not available in this browser');
+  if (connection.error || !connection.isConnected) {
+    throw new Error('Freighter was not detected. Open this site in Chrome or Edge with the Freighter extension installed and unlocked, switch Freighter to Testnet, then try again. In-app browsers cannot access browser extensions.');
+  }
 
   const network = await getNetworkDetails();
   if (network.error) {

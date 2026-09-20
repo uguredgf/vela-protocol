@@ -12,7 +12,8 @@ import { StatefulAction } from './ui/StatefulAction';
 export const PasskeyLogin: React.FC = () => {
   const { setAuth, setFreighterAuth, startGuidedDemo, isAuthenticated, classicAccount } = useStore();
   const navigate = useNavigate();
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectingAction, setConnectingAction] = useState<'create' | 'passkey' | 'freighter' | null>(null);
+  const isConnecting = connectingAction !== null;
   const [error, setError] = useState<string | null>(null);
 
   const loginError = (e: unknown): string => {
@@ -34,7 +35,7 @@ export const PasskeyLogin: React.FC = () => {
   };
 
   const handleCreate = async () => {
-    setIsConnecting(true);
+    setConnectingAction('create');
     setError(null);
     try {
       assertPasskeyEnvironment();
@@ -53,11 +54,11 @@ export const PasskeyLogin: React.FC = () => {
       console.error(e);
       setError(loginError(e));
     }
-    setIsConnecting(false);
+    setConnectingAction(null);
   };
 
   const handleConnect = async () => {
-    setIsConnecting(true);
+    setConnectingAction('passkey');
     setError(null);
     try {
       assertPasskeyEnvironment();
@@ -71,21 +72,21 @@ export const PasskeyLogin: React.FC = () => {
       console.error(e);
       setError(loginError(e));
     }
-    setIsConnecting(false);
+    setConnectingAction(null);
   };
 
   const handleFreighter = async () => {
-    setIsConnecting(true);
+    setConnectingAction('freighter');
     setError(null);
     try {
       const publicKey = await connectFreighter();
       setFreighterAuth(publicKey);
       navigate('/score');
     } catch (e) {
-      console.error(e);
+      console.warn('Freighter connection was not completed:', e);
       setError(e instanceof Error ? e.message : 'Freighter connection failed');
     } finally {
-      setIsConnecting(false);
+      setConnectingAction(null);
     }
   };
 
@@ -130,6 +131,11 @@ export const PasskeyLogin: React.FC = () => {
           <span className="status-badge">MVP</span>
         </div>
         {error && <p role="alert" className="text-red-400 text-sm">{error}</p>}
+        {error?.includes('Freighter was not detected') && (
+          <a href="https://www.freighter.app/" target="_blank" rel="noreferrer" className="freighter-help-link">
+            Freighter setup guide · opens in a new tab <ArrowUpRight size={14} />
+          </a>
+        )}
         {isAuthenticated && classicAccount && (
           <button type="button" onClick={() => navigate('/score')}
             className="bg-accent hover:bg-accent/80 text-white p-4 rounded-lg font-semibold">
@@ -151,7 +157,7 @@ export const PasskeyLogin: React.FC = () => {
         <StatefulAction
           onClick={handleCreate}
           disabled={isConnecting}
-          state={isConnecting ? 'working' : 'idle'}
+          state={connectingAction === 'create' ? 'working' : 'idle'}
           workingLabel="Creating testnet identity…"
           icon={<KeyRound size={20} />}
           className="login-choice secondary-action"
@@ -162,7 +168,7 @@ export const PasskeyLogin: React.FC = () => {
         <StatefulAction
           onClick={handleConnect}
           disabled={isConnecting}
-          state={isConnecting ? 'working' : 'idle'}
+          state={connectingAction === 'passkey' ? 'working' : 'idle'}
           workingLabel="Reconnecting passkey…"
           icon={<Fingerprint size={20} />}
           className="login-choice secondary-action"

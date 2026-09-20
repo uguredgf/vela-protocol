@@ -83,7 +83,7 @@ export const BlendPosition: React.FC = () => {
               <b>=</b>
               <div className="is-total"><span>Total supplied to Blend</span><strong>{formatAmount(estimate.totalPosition)} XLM</strong></div>
             </div>
-            <div className="supporting-row"><span>Estimated borrowing limit</span><strong>{formatAmount(estimate.borrowAmount)} XLM · not borrowed</strong></div>
+            <div className="supporting-row"><span>Illustrative 75% capacity assumption</span><strong>{formatAmount(estimate.borrowAmount)} XLM · not a live limit</strong></div>
 
             {guidedDemo ? (
               <div className="space-y-3">
