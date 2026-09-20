@@ -3,14 +3,14 @@ import { motion } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
 import { assertPasskeyEnvironment, createWallet, connectWallet } from '../services/passkey';
-import { bindClassicAccount, createFundedClassicAccount, PENDING_DEPLOY_SOURCE_KEY, provisionClassicAccount, restorePendingClassicAccount } from '../services/classicAccount';
+import { bindClassicAccount, createFundedClassicAccount, hasBoundClassicAccount, PENDING_DEPLOY_SOURCE_KEY, provisionClassicAccount, restorePendingClassicAccount } from '../services/classicAccount';
 import { connectFreighter } from '../services/freighter';
-import { ArrowUpRight, Fingerprint, ShieldCheck, Wallet } from 'lucide-react';
+import { ArrowUpRight, Fingerprint, History, KeyRound, ShieldCheck, Wallet } from 'lucide-react';
 import { ProtocolCore } from './ui/ProtocolCore';
 import { StatefulAction } from './ui/StatefulAction';
 
 export const PasskeyLogin: React.FC = () => {
-  const { setAuth, setFreighterAuth, isAuthenticated, classicAccount } = useStore();
+  const { setAuth, setFreighterAuth, startGuidedDemo, isAuthenticated, classicAccount } = useStore();
   const navigate = useNavigate();
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +44,10 @@ export const PasskeyLogin: React.FC = () => {
       const classic = bindClassicAccount(wallet.address, deployer);
       sessionStorage.removeItem(PENDING_DEPLOY_SOURCE_KEY);
       setAuth(wallet.address, classic);
+      // A newly-created helper G-account has no meaningful payment history.
+      // Open the explicitly-labelled walkthrough instead of attempting to score
+      // Friendbot/account-creation activity.
+      startGuidedDemo();
       navigate('/score');
     } catch (e) {
       console.error(e);
@@ -58,8 +62,10 @@ export const PasskeyLogin: React.FC = () => {
     try {
       assertPasskeyEnvironment();
       const wallet = await connectWallet();
+      const hasExistingHistorySource = hasBoundClassicAccount(wallet.address);
       const classic = await provisionClassicAccount(wallet.address);
       setAuth(wallet.address, classic);
+      if (!hasExistingHistorySource) startGuidedDemo();
       navigate('/score');
     } catch (e) {
       console.error(e);
@@ -117,9 +123,9 @@ export const PasskeyLogin: React.FC = () => {
 
         <div className="glass-panel login-panel p-5 md:p-7 w-full flex flex-col gap-3">
         <div className="flex items-center justify-between mb-1 px-1">
-          <div className="text-left">
-            <p className="font-semibold">Choose a secure entry</p>
-            <p className="text-xs text-gray-500 mt-0.5">Passkey secures entry; MVP protocol calls use a session-scoped testnet G-account.</p>
+          <div className="text-left min-w-0">
+            <p className="font-semibold">Choose what Vela should read</p>
+            <p className="text-xs text-gray-500 mt-0.5">Your public Stellar history and your sign-in method are separate.</p>
           </div>
           <span className="status-badge">MVP</span>
         </div>
@@ -130,42 +136,44 @@ export const PasskeyLogin: React.FC = () => {
             Continue Current Session
           </button>
         )}
+        <button
+          onClick={handleFreighter}
+          disabled={isConnecting}
+          className="login-choice login-choice--recommended secondary-action text-left disabled:opacity-50"
+        >
+          <span className="login-choice__icon"><Wallet size={20} /></span>
+          <span className="login-choice__copy"><strong>Use my Freighter wallet</strong><small>Recommended · scores this G-address’s existing public payment history</small></span>
+          <span className="login-choice__tag">LIVE</span>
+        </button>
+
+        <div className="login-divider"><span>Passkey identity</span></div>
+
         <StatefulAction
           onClick={handleCreate}
           disabled={isConnecting}
           state={isConnecting ? 'working' : 'idle'}
-          workingLabel="Preparing secure entry…"
-          icon={<Fingerprint size={20} />}
-          className="primary-action bg-accent text-white p-4 rounded-xl font-semibold"
+          workingLabel="Creating testnet identity…"
+          icon={<KeyRound size={20} />}
+          className="login-choice secondary-action"
         >
-          Create Passkey
+          <span className="login-choice__copy"><strong>Create a new Passkey identity</strong><small>Creates a new C-wallet and helper G-account · opens a labelled sample because a new account has no history</small></span>
         </StatefulAction>
-        
+
         <StatefulAction
           onClick={handleConnect}
           disabled={isConnecting}
           state={isConnecting ? 'working' : 'idle'}
-          workingLabel="Connecting passkey…"
+          workingLabel="Reconnecting passkey…"
           icon={<Fingerprint size={20} />}
-          className="secondary-action bg-surface border border-white/10 p-4 rounded-xl font-semibold"
+          className="login-choice secondary-action"
         >
-          Connect Passkey
+          <span className="login-choice__copy"><strong>Reconnect an existing Passkey</strong><small>Restores the C-wallet; Vela can only score its session-linked G-account, not the C-address itself</small></span>
         </StatefulAction>
 
-        <div className="relative flex py-2 items-center">
-          <div className="flex-grow border-t border-white/10"></div>
-          <span className="flex-shrink-0 mx-4 text-gray-500 text-sm">or</span>
-          <div className="flex-grow border-t border-white/10"></div>
+        <div className="account-model-note">
+          <History size={17} />
+          <p><strong>What is scored?</strong> Stellar Horizon history belonging to a classic <b>G-address</b>. A Passkey <b>C-address</b> is the secure smart-wallet identity; it does not automatically contain your old wallet history.</p>
         </div>
-
-        <button
-          onClick={handleFreighter}
-          disabled={isConnecting}
-          className="secondary-action bg-surface hover:bg-surface/80 border border-white/10 text-white p-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-        >
-          <Wallet size={20} />
-          Connect Freighter
-        </button>
 
         <button
           type="button"
@@ -176,7 +184,7 @@ export const PasskeyLogin: React.FC = () => {
           View Live Testnet Evidence
           <ArrowUpRight size={16} />
         </button>
-        <p className="text-[11px] leading-relaxed text-gray-500 px-2">A signal requires at least 5 non-bootstrap payments spanning 7 days. New or Friendbot-only accounts return “insufficient history,” not a score.</p>
+        <p className="text-[11px] leading-relaxed text-gray-500 px-2">A live signal requires at least 5 non-bootstrap payments spanning 7 days. New or Friendbot-only accounts open the clearly-labelled sample walkthrough instead.</p>
         </div>
       </div>
     </motion.div>

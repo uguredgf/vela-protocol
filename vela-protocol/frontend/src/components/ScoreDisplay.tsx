@@ -22,7 +22,7 @@ function impactLabel(value: number) {
 }
 
 export const ScoreDisplay: React.FC = () => {
-  const { classicAccount, score, guidedDemo, scoreExplanation, setScore, startGuidedDemo } = useStore();
+  const { classicAccount, authMethod, walletAddress, score, guidedDemo, scoreExplanation, setScore, startGuidedDemo } = useStore();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +69,14 @@ export const ScoreDisplay: React.FC = () => {
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 px-1">
       <div><div className="text-[11px] uppercase tracking-[0.25em] text-accent mb-2">{guidedDemo ? 'Guided sample' : 'On-chain signal'}</div><h1 className="display-serif text-3xl md:text-4xl font-semibold tracking-tight">{guidedDemo ? 'Sample risk signal' : 'Your credit signal'}</h1><p className="text-gray-400 mt-2 max-w-xl">{guidedDemo ? 'A clearly labeled fictional profile for exploring the interface. It is not this account’s history or a lending result.' : 'A live behavioural read of the Stellar account powering this session.'}</p></div>
       <div className={`inline-flex items-center gap-2 text-xs border px-3 py-2 rounded-full ${guidedDemo ? 'text-amber-700 bg-amber-500/10 border-amber-500/20' : 'text-emerald-700 bg-emerald-400/10 border-emerald-400/20'}`}><span className={`w-1.5 h-1.5 rounded-full ${guidedDemo ? 'bg-amber-500' : 'bg-emerald-400 animate-pulse'}`} /> {guidedDemo ? 'Fictional sample · no live claim' : 'Live Horizon data'}</div>
+    </div>
+    <div className="score-source-card" aria-label="Signal data source">
+      <div><span>{guidedDemo ? 'Walkthrough source' : 'History being scored'}</span><strong>{guidedDemo ? 'Fictional sample profile' : `${classicAccount.publicKey.slice(0, 8)}…${classicAccount.publicKey.slice(-6)}`}</strong></div>
+      <p>{guidedDemo
+        ? 'No connected wallet history is used in this walkthrough.'
+        : authMethod === 'freighter'
+          ? 'This is the G-address selected in Freighter. Vela reads its public Horizon activity.'
+          : `Passkey protects the C-wallet ${walletAddress ? `${walletAddress.slice(0, 8)}…${walletAddress.slice(-6)}` : ''}; the signal comes from its separate session-linked G-account shown here.`}</p>
     </div>
     <Card3D className="glass-panel task-panel p-6 md:p-8 grid md:grid-cols-[230px_1fr] items-center gap-8">
       <div className="flex flex-col items-center">

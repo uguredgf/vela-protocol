@@ -86,6 +86,18 @@ export function bindClassicAccount(passkeyAddress: string, account: ClassicAccou
   return account;
 }
 
+/** Whether this browser session still has the helper G-account for a Passkey wallet. */
+export function hasBoundClassicAccount(passkeyAddress: string): boolean {
+  if (!StrKey.isValidContract(passkeyAddress)) return false;
+  const saved = sessionStorage.getItem(`vela:testnet:classic:${passkeyAddress}`);
+  if (!saved) return false;
+  try {
+    return StrKey.isValidEd25519SecretSeed(saved);
+  } catch {
+    return false;
+  }
+}
+
 export async function provisionClassicAccount(passkeyAddress: string): Promise<ClassicAccount> {
   if (!StrKey.isValidContract(passkeyAddress)) throw new Error('Invalid passkey address');
 

@@ -63,32 +63,33 @@ export const BlendPosition: React.FC = () => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto space-y-6">
       <div className="glass-panel task-panel p-6 md:p-8">
-        <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-          <TrendingUp className="text-accent" /> Supply Subsidized Collateral
+        <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+          <TrendingUp className="text-accent" /> Blend Collateral Preview
         </h2>
-        {guidedDemo && <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm text-amber-800"><Info size={18} className="mt-0.5 shrink-0" /><span>Guided sample mode. The calculator is illustrative and no transaction will be submitted from this fictional score. The public fixture below remains independently verifiable.</span></div>}
+        <p className="mb-6 text-sm text-gray-500">See how a qualifying signal could increase supplied collateral. Vela never borrows automatically.</p>
+        {guidedDemo && <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm text-amber-800"><Info size={18} className="mt-0.5 shrink-0" /><span><strong>Preview only.</strong> The amount below is an adjustable example—not your wallet balance. No transaction will be sent from this sample.</span></div>}
 
         {!position || guidedDemo ? (
           <div className="space-y-6">
-            <label htmlFor="collateral" className="block text-gray-300 text-sm">Collateral (XLM, testnet)</label>
+            <label htmlFor="collateral" className="block text-gray-300 text-sm">{guidedDemo ? 'Example collateral amount (XLM)' : 'Amount to supply (XLM, testnet)'}</label>
             <input id="collateral" type="number" min="0.01" step="0.01" value={amount}
               onChange={e => setAmount(e.target.value)}
               className="w-full bg-surface border border-white/10 rounded-lg p-3 outline-none focus:border-accent" />
 
             <div className="position-equation" aria-label="Collateral composition">
-              <div><span>You supply</span><strong>{formatAmount(estimate.userCollateral)} XLM</strong></div>
+              <div><span>{guidedDemo ? 'Example user amount' : 'You supply'}</span><strong>{formatAmount(estimate.userCollateral)} XLM</strong></div>
               <b>+</b>
-              <div><span>Vela subsidy · {tier.percentage}%</span><strong className="text-accent">{formatAmount(estimate.subsidyAmount)} XLM</strong></div>
+              <div><span>Vela adds · {tier.percentage}%</span><strong className="text-accent">{formatAmount(estimate.subsidyAmount)} XLM</strong></div>
               <b>=</b>
-              <div className="is-total"><span>Blend collateral</span><strong>{formatAmount(estimate.totalPosition)} XLM</strong></div>
+              <div className="is-total"><span>Total supplied to Blend</span><strong>{formatAmount(estimate.totalPosition)} XLM</strong></div>
             </div>
-            <div className="supporting-row"><span>Illustrative capacity · no borrow</span><strong>{formatAmount(estimate.borrowAmount)} XLM</strong></div>
+            <div className="supporting-row"><span>Estimated borrowing limit</span><strong>{formatAmount(estimate.borrowAmount)} XLM · not borrowed</strong></div>
 
             {guidedDemo ? (
               <div className="space-y-3">
-                <a href={PUBLIC_SUPPLY_FIXTURE} target="_blank" rel="noreferrer" className="w-full border border-accent/25 bg-accent/10 p-4 rounded-xl font-semibold inline-flex items-center justify-center gap-2 text-accent">Inspect real Blend supply fixture <ExternalLink size={16} /></a>
-                <p className="text-xs text-gray-500 text-center">Existing testnet fixture: 1.0 XLM user input + 0.4 XLM subsidy supplied to Blend. It uses a one-byte placeholder proof and zero identity hash, so it demonstrates only integration.</p>
-                <button type="button" onClick={() => navigate('/anchor')} className="w-full bg-surface hover:bg-surface/80 border border-white/10 py-4 rounded-lg font-semibold">Explore separate Anchor rail</button>
+                <a href={PUBLIC_SUPPLY_FIXTURE} target="_blank" rel="noreferrer" className="w-full border border-accent/25 bg-accent/10 p-4 rounded-xl font-semibold inline-flex items-center justify-center gap-2 text-accent">View a completed Blend testnet transaction <ExternalLink size={16} /></a>
+                <div className="blend-proof-note"><strong>What this link proves</strong><p>A previously completed Vela test sent 1.0 XLM from a user and added 0.4 XLM before supplying 1.4 XLM to Blend. It is public evidence of the integration, not a transaction from this sample.</p><details><summary>Technical test limitation</summary><p>The published test used a placeholder proof and empty identity hash. It proves the collateral-supply path, not the full private-credit claim.</p></details></div>
+                <button type="button" onClick={() => navigate('/anchor')} className="w-full bg-surface hover:bg-surface/80 border border-white/10 py-4 rounded-lg font-semibold">Continue to TRY ↔ USDC sandbox</button>
               </div>
             ) : (
               <>

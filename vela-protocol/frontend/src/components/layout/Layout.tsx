@@ -31,7 +31,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       
       <main className="flex-1 flex flex-col px-4 py-5 md:px-8 md:py-6 max-w-5xl mx-auto w-full gap-6">
         {location.pathname !== '/evidence' && <Stepper />}
-        <VelaGuide />
+        <div className="vela-guide-row"><VelaGuide /></div>
         <div className="flex-1 route-shell">
           {children}
         </div>
